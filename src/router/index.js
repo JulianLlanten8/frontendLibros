@@ -20,13 +20,24 @@ const router = createRouter({
                     component: () => import('@/views/Dashboard.vue')
                 },
                 {
-                    path: '/inicio/SubirArchivos',
-                    name: 'SubirArchivos',
+                    path: '/inicio/subirArchivos',
+                    name: 'subirArchivos',
+                    component: () => import('@/views/pages/planeacion/subirArchivos.vue')
+                }
+            ]
+        },
+        {
+            path: '/reportes',
+            component: AppLayout,
+            children: [
+                {
+                    path: '/reportes/semanales',
+                    name: 'semanales',
                     component: () => import('@/views/pages/planeacion/crud.vue')
                 },
                 {
-                    path: '/inicio/SubirArchivos',
-                    name: 'SubirArchivos',
+                    path: '/reportes/mensuales',
+                    name: 'mensuales',
                     component: () => import('@/views/pages/planeacion/crud.vue')
                 }
             ]

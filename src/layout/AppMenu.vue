@@ -14,16 +14,16 @@ const model = ref([
                     {
                         label: 'Semanales',
                         icon: 'pi pi-fw pi-file-excel',
-                        to: '/inicio/SubirArchivos'
+                        to: '/reportes/semanales'
                     },
                     {
                         label: 'Mensuales',
                         icon: 'pi pi-fw pi-file-excel',
-                        to: '/inicio/SubirArchivos'
+                        to: '/reportes/mensuales'
                     }
                 ]
             },
-            { label: 'Subida de archivos', icon: 'pi pi-fw pi-file-import', },
+            { label: 'Subida de archivos', icon: 'pi pi-fw pi-file-import', to: '/inicio/subirArchivos' },
         ]
     },
     {

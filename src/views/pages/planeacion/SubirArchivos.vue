@@ -1,19 +1,21 @@
 <template>
     <div class="grid">
-        <div class="col-12 lg:col-6 xl:col-3">
-            <div class="card mb-0">
+        <div class="col-12">
+            <div class="card">
                 <h5>Espacio para subir archivos</h5>
-                <div class="flex justify-content-between mb-3">
-                    <Button class="bg-green-200" @click="datosPrueba()">datos de prueba</Button>
-                </div>
+                <FileUpload name="demo[]" url="./upload.php" @upload="onUpload" :multiple="true" accept="image/*"
+                    :maxFileSize="1000000" />
             </div>
         </div>
     </div>
 </template>
+
 <script setup>
-const datosPrueba = () => {
-    console.log('object');
+import { useToast } from 'primevue/usetoast';
 
-}
+const toast = useToast();
 
+const onUpload = () => {
+    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+};
 </script>
