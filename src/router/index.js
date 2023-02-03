@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
+import { guardsRoute, guardsLogin, checkRole } from './auth-guard';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -7,12 +8,13 @@ const router = createRouter({
         {
             path: '/',
             name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
-            /*  beforeEnter:[guardarLogin] */
+            component: () => import('@/views/pages/auth/Login.vue'),
+            beforeEnter: [guardsLogin]
         },
         {
             path: '/inicio',
             component: AppLayout,
+            beforeEnter: [guardsRoute],
             children: [
                 {
                     path: '/inicio/dashboard',
@@ -29,18 +31,24 @@ const router = createRouter({
         {
             path: '/reportes',
             component: AppLayout,
+            beforeEnter: [guardsRoute],
             children: [
                 {
                     path: '/reportes/semanales',
                     name: 'semanales',
-                    component: () => import('@/views/pages/planeacion/crud.vue')
+                    component: () => import('@/views/pages/planeacion/ReporteSemanal.vue')
                 },
                 {
                     path: '/reportes/mensuales',
                     name: 'mensuales',
-                    component: () => import('@/views/pages/planeacion/crud.vue')
+                    component: () => import('@/views/pages/planeacion/ReporteMensual.vue')
                 }
             ]
+        },
+        {
+            path: '/:catchAll(.*)',
+            name: 'NotFound',
+            component: () => import('@/views/pages/NotFound.vue')
         }
     ]
 });

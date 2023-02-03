@@ -254,6 +254,19 @@
 import { onMounted, reactive, ref, watch } from 'vue';
 import ProductService from '@/service/ProductService';
 import { useLayout } from '@/layout/composables/layout';
+import { obtenerTodo } from '@/service/clienteHttp';
+
+const obtenerDatosUsuario = async () => {
+    if (sessionStorage.getItem('token')) {
+        const { data } = await obtenerTodo("usuario/obtenerDatosUsuario").then(
+            (response) => {
+                console.log(response)
+                sessionStorage.setItem("datosUsuario", JSON.stringify(response));
+                return response;
+            }
+        );
+    }
+};
 
 const { isDarkTheme, contextPath } = useLayout();
 
@@ -287,6 +300,7 @@ const lineOptions = ref(null);
 const productService = new ProductService();
 
 onMounted(() => {
+    obtenerDatosUsuario();
     productService.getProductsSmall().then((data) => (products.value = data));
 });
 

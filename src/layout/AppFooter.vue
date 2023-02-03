@@ -12,8 +12,22 @@ const logoUrl = computed(() => {
 <template>
     <div class="layout-footer">
         <img :src="logoUrl" alt="Logo" height="20" class="mr-2" />
-        by
-        <span class="font-medium ml-2">PrimeVue</span>
+        <span class="font-medium ml-2">Planeacion</span>
     </div>
 </template>
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.p-rowgroup-footer td {
+    font-weight: 700;
+}
+
+::v-deep(.p-rowgroup-header) {
+    span {
+        font-weight: 700;
+    }
+
+    .p-row-toggler {
+        vertical-align: middle;
+        margin-right: .25rem;
+    }
+}
+</style>
