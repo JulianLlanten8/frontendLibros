@@ -10,7 +10,7 @@ module.exports = {
     rules: {
         'vue/multi-word-component-names': 'off',
         'vue/no-reserved-component-names': 'off',
-        'max-len': ['error', { code: 180 }],
+        'max-len': ['error', { code: 120 }],
         endOfLine: 'auto',
         usePrettierrc: true
     }

@@ -2,26 +2,42 @@
   <div>
     <Toast />
     <div class="card">
-      <h5>Expandable Row Groups</h5>
+      <h5>FC SEMANAL</h5>
       <DataTable :value="customers" rowGroupMode="subheader" groupRowsBy="representative.name" sortMode="single"
         sortField="representative.name" :sortOrder="1" responsiveLayout="scroll" :expandableRowGroups="true"
         v-model:expandedRowGroups="expandedRowGroups" @rowgroupExpand="onRowGroupExpand"
         @rowgroupCollapse="onRowGroupCollapse">
+        <ColumnGroup type="header">
+          <Row>
+            <Column :rowspan="2">
+              <Calendar v-model="cal" view="month" dateFormat="mm/yy" />
+            </Column>
+            <Column header="Semana" :colspan="6" />
+          </Row>
+          <Row>
+            <Column header="Semana (01-31) Dic" :colspan="6" />
+          </Row>
+          <Row>
+            <Column header="Concepto" :sortable="true" field="Concepto" />
+            <Column header="Descripcion" :sortable="true" field="Representative" />
+            <Column header="Ejecucion" :sortable="true" field="Ejecucion" />
+            <Column header="Esperado" :sortable="true" field="thisYearSale" />
+            <Column header="%" :sortable="true" field="lastYearProfit" />
+          </Row>
+        </ColumnGroup>
+        <!-- <Column expander style="width: 3em"></Column> -->
+        <Column field="representative.concepto" header="Concepto"></Column>
         <Column field="representative.name" header="Representative"></Column>
-        <Column field="name" header="DESCRIPCION"></Column>
-        <Column field="country" header="Ejecucion">
+        <Column field="nombre" header="DESCRIPCION"></Column>
+        <Column field="ejecucion" header="EJECUCION"></Column>
+        <Column field="esperado" header="ESPERADO"></Column>
+        <Column field="porcentaje" header="%">
           <template #body="slotProps">
-            <img src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png" width="30" />
-            <span class="image-text">{{ slotProps.data.country.name }}</span>
+            <Tag :severity="`${escalaColor(slotProps.data.porcentaje)}`">
+              {{ slotProps.data.porcentaje }} %
+            </Tag>
           </template>
         </Column>
-        <Column field="company" header="Esperado"></Column>
-        <Column field="status" header="%">
-          <template #body="slotProps">
-            <span :class="'customer-badge status-' + slotProps.data.status">{{ slotProps.data.status }}</span>
-          </template>
-        </Column>
-        <Column field="date" header="Date"></Column>
         <template #groupheader="slotProps">
           <img :alt="slotProps.data.representative.name"
             src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png" width="32"
@@ -29,7 +45,12 @@
           <span class="image-text">{{ slotProps.data.representative.name }}</span>
         </template>
         <template #groupfooter="slotProps">
-          <td colspan="4" style="text-align: right">Total Customers</td>
+          <td colspan="2">Total Customers</td>
+          <td>
+            ${{ new Intl.NumberFormat('co-CO').format(calcularTotalEjecucion(slotProps.data.representative.name)) }}
+          </td>
+          <td>${{ new Intl.NumberFormat('co-CO').format(calcularTotalEsperado(slotProps.data.representative.name)) }}
+          </td>
           <td>{{ calculateCustomerTotal(slotProps.data.representative.name) }}</td>
         </template>
       </DataTable>
@@ -54,6 +75,41 @@ const calculateCustomerTotal = (name) => {
 
   return total;
 };
+const calcularTotalEjecucion = (name) => {
+  let ejecucion = 0;
+
+  if (customers.value) {
+    for (let customer of customers.value) {
+      if (customer.representative.name === name) {
+        ejecucion += customer.ejecucion;
+      }
+    }
+  }
+
+  return ejecucion;
+};
+
+const calcularTotalEsperado = (name) => {
+  let esperado = 0;
+
+  if (customers.value) {
+    for (let customer of customers.value) {
+      if (customer.representative.name === name) {
+        esperado += customer.esperado;
+      }
+    }
+  }
+
+  return esperado;
+};
+
+const escalaColor = (porcentaje) => {
+  if (porcentaje >= 80) return 'success';
+  if (porcentaje >= 1) return 'warning';
+  if (porcentaje == 0) return 'info';
+  return 'danger';
+};
+
 const onRowGroupExpand = (event) => {
   toast.add({ severity: 'info', summary: 'Row Group Expanded', detail: 'Value: ' + event.data, life: 3000 });
 };
@@ -64,89 +120,66 @@ const customers = ref(
   [
     {
       "id": 1000,
-      "name": "James Butt",
-      "country": {
-        "name": "Algeria",
-        "code": "dz"
-      },
-      "company": "John B Jr",
-      "date": "2015-09-13",
-      "status": "unqualified",
-      "verified": false,
-      "activity": 16,
+      "nombre": "SALDO INICIAL",
+      "ejecucion": 2763672789,
+      "esperado": 2763672789,
+      "porcentaje": 100,
       "representative": {
         "name": "SALDO INICIAL",
         "image": "ionibowcher.png"
       },
-      "balance": 80663
-    },
-    {
-      "id": 1000,
-      "name": "James Butt",
-      "country": {
-        "name": "Algeria",
-        "code": "dz"
-      },
-      "company": "Benton",
-      "date": "2015-09-13",
-      "status": "unqualified",
-      "verified": true,
-      "activity": 17,
-      "representative": {
-        "name": "SALDO INICIAL",
-        "image": "ionibowcher.png"
-      },
-      "balance": 70663
     },
     {
       "id": 1001,
-      "name": "Josephine Darakjy",
-      "country": {
-        "name": "Egypt",
-        "code": "eg"
-      },
-      "company": "Chanay, Jeffrey A Esq",
-      "date": "2019-02-09",
-      "status": "proposal",
-      "verified": true,
-      "activity": 0,
+      "nombre": "RECAUDOS FEE PAO",
+      "ejecucion": 1700763213,
+      "esperado": 1788523079,
+      "porcentaje": 95,
       "representative": {
         "name": "ACTIVIDAD DE OPERACION",
         "image": "amyelsner.png"
       },
-      "balance": 82429
     },
     {
       "id": 1002,
-      "name": "Art Venere",
-      "country": {
-        "name": "Panama",
-        "code": "pa"
-      },
-      "company": "Chemel, James L Cpa",
-      "date": "2017-05-13",
-      "status": "qualified",
-      "verified": false,
-      "activity": 63,
+      "nombre": "CAPEX TICAPEX TI (LICENCIAS)",
+      "ejecucion": 123,
+      "esperado": 1381836394,
+      "porcentaje": 95,
       "representative": {
         "name": "ACTIVIDAD DE INVERSION",
         "image": "asiyajavayant.png"
       },
-      "balance": 28334
+    },
+    {
+      "id": 1002,
+      "nombre": "CAPEX RECOBRO",
+      "ejecucion": 123,
+      "esperado": 12581836394,
+      "porcentaje": 95,
+      "representative": {
+        "name": "ACTIVIDAD DE INVERSION",
+        "image": "asiyajavayant.png"
+      },
     },
     //tres
     {
       "id": 1003,
-      "name": "RECAUDOS FEE PAO",
-      "country": {
-        "name": "Slovenia",
-        "code": "si"
+      "nombre": "RECAUDOS FEE PAO",
+      "ejecucion": 123,
+      "esperado": 1000000,
+      "porcentaje": 100,
+      "representative": {
+        "name": "ACTIVIDAD DE FINANCIACION",
+        "image": "xuxuefeng.png"
       },
-      "company": 1000000,
-      "date": "2020-09-15",
-      "status": "new",
-      "verified": false,
-      "activity": 37,
+    },
+    {
+      "id": 1003,
+      "nombre": "RECAUDOS FEE CS-CC",
+      "ejecucion": 123,
+      "esperado": 4356121315,
+      "porcentaje": 0,
       "representative": {
         "name": "ACTIVIDAD DE FINANCIACION",
         "image": "xuxuefeng.png"
@@ -155,114 +188,94 @@ const customers = ref(
     },
     {
       "id": 1003,
-      "name": "RECAUDOS FEE CS-CC",
-      "country": {
-        "name": "Slovenia",
-        "code": "si"
-      },
-      "company": 4400000,
-      "date": "2020-09-15",
-      "status": "new",
-      "verified": false,
-      "activity": 37,
+      "nombre": "OTROS RECAUDOS",
+      "ejecucion": 123,
+      "esperado": 871224263,
+      "porcentaje": 80,
       "representative": {
         "name": "ACTIVIDAD DE FINANCIACION",
         "image": "xuxuefeng.png"
       },
-      "balance": 88521
-    },
-    {
-      "id": 1003,
-      "name": "OTROS RECAUDOS",
-      "country": {
-        "name": "Slovenia",
-        "code": "si"
-      },
-      "company": 23000000,
-      "date": "2020-09-15",
-      "status": "new",
-      "verified": false,
-      "activity": 37,
-      "representative": {
-        "name": "ACTIVIDAD DE FINANCIACION",
-        "image": "xuxuefeng.png"
-      },
-      "balance": 88521
     },
 
     //tres fin
 
     {
       "id": 1004,
-      "name": "Donette Foller",
-      "country": {
-        "name": "South Africa",
-        "code": "za"
-      },
-      "company": "Printing Dimensions",
-      "date": "2016-05-20",
-      "status": "proposal",
-      "verified": true,
-      "activity": 33,
+      "nombre": "PAGO DE IVA",
+      "ejecucion": 123,
+      "esperado": 2013672789,
+      "porcentaje": 86,
       "representative": {
         "name": "OTROS EGRESOS",
         "image": "asiyajavayant.png"
       },
-      "balance": 93905
+    },
+    {
+      "id": 1004,
+      "nombre": "PAGO DE RETENCIÓN EN LA FUENTE",
+      "ejecucion": 123,
+      "esperado": 2013672789,
+      "porcentaje": 62,
+      "representative": {
+        "name": "OTROS EGRESOS",
+        "image": "asiyajavayant.png"
+      },
+    },
+    {
+      "id": 1004,
+      "nombre": "PAGO DE IMPUESTOS (RENTA, CREE Y RIQUEZA)",
+      "ejecucion": 123,
+      "esperado": 2013672789,
+      "porcentaje": 86,
+      "representative": {
+        "name": "OTROS EGRESOS",
+        "image": "asiyajavayant.png"
+      },
+    },
+    {
+      "id": 1004,
+      "nombre": "PAGO DE OTROS EGRESOS",
+      "ejecucion": 123,
+      "esperado": 2013672789,
+      "porcentaje": 86,
+      "representative": {
+        "name": "OTROS EGRESOS",
+        "image": "asiyajavayant.png"
+      },
     },
     {
       "id": 1005,
-      "name": "Simona Morasca",
-      "country": {
-        "name": "Egypt",
-        "code": "eg"
-      },
-      "company": "Chapman, Ross E Esq",
-      "date": "2018-02-16",
-      "status": "qualified",
-      "verified": false,
-      "activity": 68,
+      "nombre": "FLUJO NETO",
+      "ejecucion": 112685229,
+      "esperado": 478279839,
+      "porcentaje": -92,
       "representative": {
         "name": "FLUJO NETO",
         "image": "ivanmagalhaes.png"
       },
-      "balance": 50041
     },
     {
       "id": 1006,
-      "name": "Mitsue Tollner",
-      "country": {
-        "name": "Paraguay",
-        "code": "py"
-      },
-      "company": "Morlong Associates",
-      "date": "2018-02-19",
-      "status": "renewal",
-      "verified": true,
-      "activity": 54,
+      "nombre": "SALDO DE CAJA FINAL",
+      "ejecucion": 2876358018,
+      "esperado": 2713672789,
+      "porcentaje": 0,
       "representative": {
         "name": "SALDO DE CAJA FINAL",
         "image": "ivanmagalhaes.png"
       },
-      "balance": 58706
     },
     {
       "id": 1007,
-      "name": "Leota Dilliard",
-      "country": {
-        "name": "Serbia",
-        "code": "rs"
-      },
-      "company": "Commercial Press",
-      "date": "2019-08-13",
-      "status": "renewal",
-      "verified": true,
-      "activity": 69,
+      "nombre": "Leota Dilliard",
+      "ejecucion": 2285392950,
+      "esperado": 72789,
+      "porcentaje": 144,
       "representative": {
         "name": "Sobregiro SEC",
         "image": "onyamalimba.png"
       },
-      "balance": 26640
     }
   ]
 )
