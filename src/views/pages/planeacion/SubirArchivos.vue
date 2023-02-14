@@ -3,8 +3,14 @@
         <div class="col-12">
             <div class="card">
                 <h5>Espacio para subir archivos</h5>
-                <FileUpload name="demo[]" url="./upload.php" @upload="onUpload" :multiple="true" accept="image/*"
-                    :maxFileSize="1000000" />
+                <FileUpload
+                    name="demo[]"
+                    url="./upload.php"
+                    @upload="onUpload"
+                    :multiple="true"
+                    accept="image/*"
+                    :maxFileSize="1000000"
+                />
             </div>
         </div>
     </div>

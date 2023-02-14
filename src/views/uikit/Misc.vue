@@ -1,35 +1,3 @@
-<script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { useLayout } from '@/layout/composables/layout';
-
-const { contextPath } = useLayout();
-
-const value = ref(0);
-let interval = null;
-
-const startProgress = () => {
-    interval = setInterval(() => {
-        let newValue = value.value + Math.floor(Math.random() * 10) + 1;
-        if (newValue >= 100) {
-            newValue = 100;
-        }
-        value.value = newValue;
-    }, 2000);
-};
-const endProgress = () => {
-    clearInterval(interval);
-    interval = null;
-};
-
-onMounted(() => {
-    startProgress();
-});
-
-onBeforeUnmount(() => {
-    endProgress();
-});
-</script>
-
 <template>
     <div class="grid">
         <div class="col-12">
@@ -64,7 +32,13 @@ onBeforeUnmount(() => {
 
                 <h5>Inline Button Badge</h5>
                 <Button label="Emails" badge="8" class="mr-2"></Button>
-                <Button label="Messages" icon="pi pi-users" class="p-button-warning" badge="8" badgeClass="p-badge-danger"></Button>
+                <Button
+                    label="Messages"
+                    icon="pi pi-users"
+                    class="p-button-warning"
+                    badge="8"
+                    badgeClass="p-badge-danger"
+                ></Button>
 
                 <h5>Sizes</h5>
                 <div class="badges">
@@ -78,18 +52,54 @@ onBeforeUnmount(() => {
                 <h4>Avatar</h4>
                 <h5>Avatar Group</h5>
                 <AvatarGroup class="mb-3">
-                    <Avatar :image="contextPath + 'demo/images/avatar/amyelsner.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="contextPath + 'demo/images/avatar/asiyajavayant.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="contextPath + 'demo/images/avatar/onyamalimba.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="contextPath + 'demo/images/avatar/ionibowcher.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="contextPath + 'demo/images/avatar/xuxuefeng.png'" size="large" shape="circle"></Avatar>
-                    <Avatar label="+2" shape="circle" size="large" :style="{ 'background-color': '#9c27b0', color: '#ffffff' }"></Avatar>
+                    <Avatar
+                        :image="contextPath + 'demo/images/avatar/amyelsner.png'"
+                        size="large"
+                        shape="circle"
+                    ></Avatar>
+                    <Avatar
+                        :image="contextPath + 'demo/images/avatar/asiyajavayant.png'"
+                        size="large"
+                        shape="circle"
+                    ></Avatar>
+                    <Avatar
+                        :image="contextPath + 'demo/images/avatar/onyamalimba.png'"
+                        size="large"
+                        shape="circle"
+                    ></Avatar>
+                    <Avatar
+                        :image="contextPath + 'demo/images/avatar/ionibowcher.png'"
+                        size="large"
+                        shape="circle"
+                    ></Avatar>
+                    <Avatar
+                        :image="contextPath + 'demo/images/avatar/xuxuefeng.png'"
+                        size="large"
+                        shape="circle"
+                    ></Avatar>
+                    <Avatar
+                        label="+2"
+                        shape="circle"
+                        size="large"
+                        :style="{ 'background-color': '#9c27b0', color: '#ffffff' }"
+                    ></Avatar>
                 </AvatarGroup>
 
                 <h5>Label - Circle</h5>
                 <Avatar label="P" class="mr-2" size="xlarge" shape="circle"></Avatar>
-                <Avatar label="V" class="mr-2" size="large" :style="{ 'background-color': '#2196F3', color: '#ffffff' }" shape="circle"></Avatar>
-                <Avatar label="U" class="mr-2" :style="{ 'background-color': '#9c27b0', color: '#ffffff' }" shape="circle"></Avatar>
+                <Avatar
+                    label="V"
+                    class="mr-2"
+                    size="large"
+                    :style="{ 'background-color': '#2196F3', color: '#ffffff' }"
+                    shape="circle"
+                ></Avatar>
+                <Avatar
+                    label="U"
+                    class="mr-2"
+                    :style="{ 'background-color': '#9c27b0', color: '#ffffff' }"
+                    shape="circle"
+                ></Avatar>
 
                 <h5>Icon - Badge</h5>
                 <Avatar icon="pi pi-user" class="mr-2" size="xlarge" v-badge.success="4"></Avatar>
@@ -99,11 +109,17 @@ onBeforeUnmount(() => {
                 <h4>ScrollTop</h4>
                 <ScrollPanel :style="{ width: '250px', height: '200px' }">
                     <p>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Vitae et leo duis ut diam. Ultricies mi quis hendrerit dolor magna eget est lorem. Amet consectetur
-                        adipiscing elit ut. Nam libero justo laoreet sit amet. Pharetra massa massa ultricies mi quis hendrerit dolor magna. Est ultricies integer quis auctor elit sed vulputate. Consequat ac felis donec et. Tellus orci ac auctor
-                        augue mauris. Semper feugiat nibh sed pulvinar proin gravida hendrerit lectus a. Tincidunt arcu non sodales neque sodales. Metus aliquam eleifend mi in nulla posuere sollicitudin aliquam ultrices. Sodales ut etiam sit amet
-                        nisl purus. Cursus sit amet dictum sit amet. Tristique senectus et netus et malesuada fames ac turpis egestas. Et tortor consequat id porta nibh venenatis cras sed. Diam maecenas ultricies mi eget mauris. Eget egestas purus
-                        viverra accumsan in nisl nisi. Suscipit adipiscing bibendum est ultricies integer. Mattis aliquam faucibus purus in massa tempor nec.
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+                        labore et dolore magna aliqua. Vitae et leo duis ut diam. Ultricies mi quis hendrerit dolor
+                        magna eget est lorem. Amet consectetur adipiscing elit ut. Nam libero justo laoreet sit amet.
+                        Pharetra massa massa ultricies mi quis hendrerit dolor magna. Est ultricies integer quis auctor
+                        elit sed vulputate. Consequat ac felis donec et. Tellus orci ac auctor augue mauris. Semper
+                        feugiat nibh sed pulvinar proin gravida hendrerit lectus a. Tincidunt arcu non sodales neque
+                        sodales. Metus aliquam eleifend mi in nulla posuere sollicitudin aliquam ultrices. Sodales ut
+                        etiam sit amet nisl purus. Cursus sit amet dictum sit amet. Tristique senectus et netus et
+                        malesuada fames ac turpis egestas. Et tortor consequat id porta nibh venenatis cras sed. Diam
+                        maecenas ultricies mi eget mauris. Eget egestas purus viverra accumsan in nisl nisi. Suscipit
+                        adipiscing bibendum est ultricies integer. Mattis aliquam faucibus purus in massa tempor nec.
                     </p>
                     <ScrollTop target="parent" :threshold="100" icon="pi pi-arrow-up"></ScrollTop>
                 </ScrollPanel>
@@ -154,9 +170,21 @@ onBeforeUnmount(() => {
 
                 <h5>Image</h5>
                 <div class="flex align-items-center flex-column sm:flex-row">
-                    <Chip label="Amy Elsner" :image="contextPath + 'demo/images/avatar/amyelsner.png'" class="mr-2 mb-2"></Chip>
-                    <Chip label="Asiya Javayant" :image="contextPath + 'demo/images/avatar/asiyajavayant.png'" class="mr-2 mb-2"></Chip>
-                    <Chip label="Onyama Limba" :image="contextPath + 'demo/images/avatar/onyamalimba.png'" class="mr-2 mb-2"></Chip>
+                    <Chip
+                        label="Amy Elsner"
+                        :image="contextPath + 'demo/images/avatar/amyelsner.png'"
+                        class="mr-2 mb-2"
+                    ></Chip>
+                    <Chip
+                        label="Asiya Javayant"
+                        :image="contextPath + 'demo/images/avatar/asiyajavayant.png'"
+                        class="mr-2 mb-2"
+                    ></Chip>
+                    <Chip
+                        label="Onyama Limba"
+                        :image="contextPath + 'demo/images/avatar/onyamalimba.png'"
+                        class="mr-2 mb-2"
+                    ></Chip>
                 </div>
             </div>
 
@@ -181,3 +209,35 @@ onBeforeUnmount(() => {
         </div>
     </div>
 </template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useLayout } from '@/layout/composables/layout';
+
+const { contextPath } = useLayout();
+
+const value = ref(0);
+let interval = null;
+
+const startProgress = () => {
+    interval = setInterval(() => {
+        let newValue = value.value + Math.floor(Math.random() * 10) + 1;
+        if (newValue >= 100) {
+            newValue = 100;
+        }
+        value.value = newValue;
+    }, 2000);
+};
+const endProgress = () => {
+    clearInterval(interval);
+    interval = null;
+};
+
+onMounted(() => {
+    startProgress();
+});
+
+onBeforeUnmount(() => {
+    endProgress();
+});
+</script>

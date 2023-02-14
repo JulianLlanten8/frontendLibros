@@ -1,3 +1,20 @@
+<template>
+    <div class="layout-wrapper" :class="containerClass">
+        <app-topbar></app-topbar>
+        <div class="layout-sidebar">
+            <app-sidebar></app-sidebar>
+        </div>
+        <div class="layout-main-container">
+            <div class="layout-main">
+                <router-view></router-view>
+            </div>
+            <app-footer></app-footer>
+        </div>
+        <app-config></app-config>
+        <div class="layout-mask"></div>
+    </div>
+</template>
+
 <script setup>
 import { computed, watch, ref } from 'vue';
 import AppTopbar from './AppTopbar.vue';
@@ -24,7 +41,8 @@ const containerClass = computed(() => {
         'layout-theme-dark': layoutConfig.darkTheme.value === 'dark',
         'layout-overlay': layoutConfig.menuMode.value === 'overlay',
         'layout-static': layoutConfig.menuMode.value === 'static',
-        'layout-static-inactive': layoutState.staticMenuDesktopInactive.value && layoutConfig.menuMode.value === 'static',
+        'layout-static-inactive':
+            layoutState.staticMenuDesktopInactive.value && layoutConfig.menuMode.value === 'static',
         'layout-overlay-active': layoutState.overlayMenuActive.value,
         'layout-mobile-active': layoutState.staticMenuMobileActive.value,
         'p-input-filled': layoutConfig.inputStyle.value === 'filled',
@@ -53,25 +71,13 @@ const isOutsideClicked = (event) => {
     const sidebarEl = document.querySelector('.layout-sidebar');
     const topbarEl = document.querySelector('.layout-menu-button');
 
-    return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
+    return !(
+        sidebarEl.isSameNode(event.target) ||
+        sidebarEl.contains(event.target) ||
+        topbarEl.isSameNode(event.target) ||
+        topbarEl.contains(event.target)
+    );
 };
 </script>
-
-<template>
-    <div class="layout-wrapper " :class="containerClass">
-        <app-topbar></app-topbar>
-        <div class="layout-sidebar ">
-            <app-sidebar></app-sidebar>
-        </div>
-        <div class="layout-main-container">
-            <div class="layout-main">
-                <router-view></router-view>
-            </div>
-            <app-footer></app-footer>
-        </div>
-        <app-config></app-config>
-        <div class="layout-mask"></div>
-    </div>
-</template>
 
 <style lang="scss" scoped></style>

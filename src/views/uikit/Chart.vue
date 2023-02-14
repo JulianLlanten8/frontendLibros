@@ -1,3 +1,44 @@
+<template>
+    <div class="grid p-fluid">
+        <div class="col-12 xl:col-6">
+            <div class="card">
+                <h5>Linear Chart</h5>
+                <Chart type="line" :data="lineData" :options="lineOptions"></Chart>
+            </div>
+        </div>
+        <div class="col-12 xl:col-6">
+            <div class="card">
+                <h5>Bar Chart</h5>
+                <Chart type="bar" :data="barData" :options="barOptions"></Chart>
+            </div>
+        </div>
+        <div class="col-12 xl:col-6">
+            <div class="card flex flex-column align-items-center">
+                <h5 class="text-left w-full">Pie Chart</h5>
+                <Chart type="pie" :data="pieData" :options="pieOptions"></Chart>
+            </div>
+        </div>
+        <div class="col-12 xl:col-6">
+            <div class="card flex flex-column align-items-center">
+                <h5 class="text-left w-full">Doughnut Chart</h5>
+                <Chart type="doughnut" :data="pieData" :options="pieOptions"></Chart>
+            </div>
+        </div>
+        <div class="col-12 xl:col-6">
+            <div class="card flex flex-column align-items-center">
+                <h5 class="text-left w-full">Polar Area Chart</h5>
+                <Chart type="polarArea" :data="polarData" :options="polarOptions"></Chart>
+            </div>
+        </div>
+        <div class="col-12 xl:col-6">
+            <div class="card flex flex-column align-items-center">
+                <h5 class="text-left w-full">Radar Chart</h5>
+                <Chart type="radar" :data="radarData" :options="radarOptions"></Chart>
+            </div>
+        </div>
+    </div>
+</template>
+
 <script setup>
 import { ref, watch } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
@@ -83,8 +124,16 @@ const setChart = () => {
         datasets: [
             {
                 data: [540, 325, 702],
-                backgroundColor: [documentStyle.getPropertyValue('--indigo-500'), documentStyle.getPropertyValue('--purple-500'), documentStyle.getPropertyValue('--teal-500')],
-                hoverBackgroundColor: [documentStyle.getPropertyValue('--indigo-400'), documentStyle.getPropertyValue('--purple-400'), documentStyle.getPropertyValue('--teal-400')]
+                backgroundColor: [
+                    documentStyle.getPropertyValue('--indigo-500'),
+                    documentStyle.getPropertyValue('--purple-500'),
+                    documentStyle.getPropertyValue('--teal-500')
+                ],
+                hoverBackgroundColor: [
+                    documentStyle.getPropertyValue('--indigo-400'),
+                    documentStyle.getPropertyValue('--purple-400'),
+                    documentStyle.getPropertyValue('--teal-400')
+                ]
             }
         ]
     };
@@ -156,7 +205,12 @@ const setChart = () => {
         datasets: [
             {
                 data: [11, 16, 7, 3],
-                backgroundColor: [documentStyle.getPropertyValue('--indigo-500'), documentStyle.getPropertyValue('--purple-500'), documentStyle.getPropertyValue('--teal-500'), documentStyle.getPropertyValue('--orange-500')],
+                backgroundColor: [
+                    documentStyle.getPropertyValue('--indigo-500'),
+                    documentStyle.getPropertyValue('--purple-500'),
+                    documentStyle.getPropertyValue('--teal-500'),
+                    documentStyle.getPropertyValue('--orange-500')
+                ],
                 label: 'My dataset'
             }
         ],
@@ -231,44 +285,3 @@ watch(
     { immediate: true }
 );
 </script>
-
-<template>
-    <div class="grid p-fluid">
-        <div class="col-12 xl:col-6">
-            <div class="card">
-                <h5>Linear Chart</h5>
-                <Chart type="line" :data="lineData" :options="lineOptions"></Chart>
-            </div>
-        </div>
-        <div class="col-12 xl:col-6">
-            <div class="card">
-                <h5>Bar Chart</h5>
-                <Chart type="bar" :data="barData" :options="barOptions"></Chart>
-            </div>
-        </div>
-        <div class="col-12 xl:col-6">
-            <div class="card flex flex-column align-items-center">
-                <h5 class="text-left w-full">Pie Chart</h5>
-                <Chart type="pie" :data="pieData" :options="pieOptions"></Chart>
-            </div>
-        </div>
-        <div class="col-12 xl:col-6">
-            <div class="card flex flex-column align-items-center">
-                <h5 class="text-left w-full">Doughnut Chart</h5>
-                <Chart type="doughnut" :data="pieData" :options="pieOptions"></Chart>
-            </div>
-        </div>
-        <div class="col-12 xl:col-6">
-            <div class="card flex flex-column align-items-center">
-                <h5 class="text-left w-full">Polar Area Chart</h5>
-                <Chart type="polarArea" :data="polarData" :options="polarOptions"></Chart>
-            </div>
-        </div>
-        <div class="col-12 xl:col-6">
-            <div class="card flex flex-column align-items-center">
-                <h5 class="text-left w-full">Radar Chart</h5>
-                <Chart type="radar" :data="radarData" :options="radarOptions"></Chart>
-            </div>
-        </div>
-    </div>
-</template>

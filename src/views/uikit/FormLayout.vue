@@ -1,15 +1,3 @@
-<script setup>
-import { ref } from 'vue';
-
-const dropdownItems = ref([
-    { name: 'Option 1', code: 'Option 1' },
-    { name: 'Option 2', code: 'Option 2' },
-    { name: 'Option 3', code: 'Option 3' }
-]);
-
-const dropdownItem = ref(null);
-</script>
-
 <template>
     <div class="grid">
         <div class="col-12 md:col-6">
@@ -108,7 +96,13 @@ const dropdownItem = ref(null);
                     </div>
                     <div class="field col-12 md:col-3">
                         <label for="state">State</label>
-                        <Dropdown id="state" v-model="dropdownItem" :options="dropdownItems" optionLabel="name" placeholder="Select One"></Dropdown>
+                        <Dropdown
+                            id="state"
+                            v-model="dropdownItem"
+                            :options="dropdownItems"
+                            optionLabel="name"
+                            placeholder="Select One"
+                        ></Dropdown>
                     </div>
                     <div class="field col-12 md:col-3">
                         <label for="zip">Zip</label>
@@ -119,3 +113,15 @@ const dropdownItem = ref(null);
         </div>
     </div>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+
+const dropdownItems = ref([
+    { name: 'Option 1', code: 'Option 1' },
+    { name: 'Option 2', code: 'Option 2' },
+    { name: 'Option 3', code: 'Option 3' }
+]);
+
+const dropdownItem = ref(null);
+</script>

@@ -1,32 +1,3 @@
-<script setup>
-import { ref } from 'vue';
-
-const items = ref([
-    {
-        label: 'Update',
-        icon: 'pi pi-refresh'
-    },
-    {
-        label: 'Delete',
-        icon: 'pi pi-times'
-    },
-    {
-        separator: true
-    },
-    {
-        label: 'Home',
-        icon: 'pi pi-home'
-    }
-]);
-
-const loading = ref([false, false, false]);
-
-const load = (index) => {
-    loading.value[index] = true;
-    setTimeout(() => (loading.value[index] = false), 1000);
-};
-</script>
-
 <template>
     <div class="grid">
         <div class="col-12 md:col-6">
@@ -81,11 +52,36 @@ const load = (index) => {
 
             <div class="card">
                 <h5>SplitButton</h5>
-                <SplitButton label="Save" icon="pi pi-check" :model="items" class="p-button-secondary mr-2 mb-2"></SplitButton>
-                <SplitButton label="Save" icon="pi pi-check" :model="items" class="p-button-success mr-2 mb-2"></SplitButton>
-                <SplitButton label="Save" icon="pi pi-check" :model="items" class="p-button-info mr-2 mb-2"></SplitButton>
-                <SplitButton label="Save" icon="pi pi-check" :model="items" class="p-button-warning mr-2 mb-2"></SplitButton>
-                <SplitButton label="Save" icon="pi pi-check" :model="items" class="p-button-danger mr-2 mb-2"></SplitButton>
+                <SplitButton
+                    label="Save"
+                    icon="pi pi-check"
+                    :model="items"
+                    class="p-button-secondary mr-2 mb-2"
+                ></SplitButton>
+                <SplitButton
+                    label="Save"
+                    icon="pi pi-check"
+                    :model="items"
+                    class="p-button-success mr-2 mb-2"
+                ></SplitButton>
+                <SplitButton
+                    label="Save"
+                    icon="pi pi-check"
+                    :model="items"
+                    class="p-button-info mr-2 mb-2"
+                ></SplitButton>
+                <SplitButton
+                    label="Save"
+                    icon="pi pi-check"
+                    :model="items"
+                    class="p-button-warning mr-2 mb-2"
+                ></SplitButton>
+                <SplitButton
+                    label="Save"
+                    icon="pi pi-check"
+                    :model="items"
+                    class="p-button-danger mr-2 mb-2"
+                ></SplitButton>
             </div>
 
             <div class="card">
@@ -176,14 +172,58 @@ const load = (index) => {
 
             <div class="card">
                 <h5>Loading</h5>
-                <Button type="button" class="mr-2 mb-2" label="Search" icon="pi pi-search" :loading="loading[0]" @click="load(0)" />
-                <Button type="button" class="mr-2 mb-2" label="Search" icon="pi pi-search" iconPos="right" :loading="loading[1]" @click="load(1)" />
+                <Button
+                    type="button"
+                    class="mr-2 mb-2"
+                    label="Search"
+                    icon="pi pi-search"
+                    :loading="loading[0]"
+                    @click="load(0)"
+                />
+                <Button
+                    type="button"
+                    class="mr-2 mb-2"
+                    label="Search"
+                    icon="pi pi-search"
+                    iconPos="right"
+                    :loading="loading[1]"
+                    @click="load(1)"
+                />
                 <Button type="button" class="mr-2 mb-2" icon="pi pi-search" :loading="loading[2]" @click="load(2)" />
                 <Button type="button" class="mr-2 mb-2" label="Search" :loading="loading[3]" @click="load(3)" />
             </div>
         </div>
     </div>
 </template>
+
+<script setup>
+import { ref } from 'vue';
+
+const items = ref([
+    {
+        label: 'Update',
+        icon: 'pi pi-refresh'
+    },
+    {
+        label: 'Delete',
+        icon: 'pi pi-times'
+    },
+    {
+        separator: true
+    },
+    {
+        label: 'Home',
+        icon: 'pi pi-home'
+    }
+]);
+
+const loading = ref([false, false, false]);
+
+const load = (index) => {
+    loading.value[index] = true;
+    setTimeout(() => (loading.value[index] = false), 1000);
+};
+</script>
 
 <style lang="scss" scoped>
 .google {

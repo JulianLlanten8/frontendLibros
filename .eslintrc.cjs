@@ -10,8 +10,13 @@ module.exports = {
     rules: {
         'vue/multi-word-component-names': 'off',
         'vue/no-reserved-component-names': 'off',
-        'max-len': ['error', { code: 120 }],
-        endOfLine: 'auto',
-        usePrettierrc: true
+        'max-len': ['error', { code: 150 }],
+        'vue/component-tags-order': [
+            'error',
+            {
+                order: ['template', 'script', 'style']
+            }
+        ],
+        'prettier/prettier': 'error'
     }
 };

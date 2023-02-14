@@ -85,7 +85,7 @@ const actualizar = async (RUTA, DATA) => {
     }
 };
 
-const enviarDatos  = async (RUTA, DATA) => {
+const enviarDatos = async (RUTA, DATA) => {
     try {
         const respuesta = await axios.post(`${RUTA}`, DATA, {
             headers: {

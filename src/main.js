@@ -105,8 +105,11 @@ import BlockViewer from '@/components/BlockViewer.vue';
 
 import '@/assets/styles.scss';
 
+import { formatoMonedaCOP } from '@/utils/globals';
+
 const app = createApp(App);
 
+app.config.globalProperties.$formatoMonedaCOP = formatoMonedaCOP;
 app.use(router);
 app.use(PrimeVue, { ripple: true });
 app.use(ToastService);

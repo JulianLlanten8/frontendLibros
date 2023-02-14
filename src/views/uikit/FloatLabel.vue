@@ -1,46 +1,3 @@
-<script setup>
-import { ref, onMounted } from 'vue';
-import CountryService from '@/service/CountryService';
-
-const countries = ref([]);
-const cities = ref([
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-    { name: 'London', code: 'LDN' },
-    { name: 'Istanbul', code: 'IST' },
-    { name: 'Paris', code: 'PRS' }
-]);
-const filteredCountries = ref(null);
-const value1 = ref(null);
-const value2 = ref(null);
-const value3 = ref(null);
-const value4 = ref(null);
-const value5 = ref(null);
-const value6 = ref(null);
-const value7 = ref(null);
-const value8 = ref(null);
-const value9 = ref(null);
-const value10 = ref(null);
-const countryService = new CountryService();
-
-onMounted(() => {
-    countryService.getCountries().then((data) => (countries.value = data));
-});
-
-const searchCountry = (event) => {
-    //in a real application, make a request to a remote url with the query and return filtered results, for demo we filter at client side
-    const filtered = [];
-    const query = event.query;
-    for (let i = 0; i < countries.value.length; i++) {
-        const country = countries.value[i];
-        if (country.name.toLowerCase().indexOf(query.toLowerCase()) == 0) {
-            filtered.push(country);
-        }
-    }
-    filteredCountries.value = filtered;
-};
-</script>
-
 <template>
     <div class="card">
         <h5>Float Label</h5>
@@ -53,7 +10,13 @@ const searchCountry = (event) => {
             </div>
             <div class="field col-12 md:col-4">
                 <span class="p-float-label">
-                    <AutoComplete id="autocomplete" v-model="value2" :suggestions="filteredCountries" @complete="searchCountry($event)" field="name"></AutoComplete>
+                    <AutoComplete
+                        id="autocomplete"
+                        v-model="value2"
+                        :suggestions="filteredCountries"
+                        @complete="searchCountry($event)"
+                        field="name"
+                    ></AutoComplete>
                     <label for="autocomplete">AutoComplete</label>
                 </span>
             </div>
@@ -100,7 +63,13 @@ const searchCountry = (event) => {
             </div>
             <div class="field col-12 md:col-4">
                 <span class="p-float-label">
-                    <MultiSelect id="multiselect" :options="cities" v-model="value9" optionLabel="name" :filter="false"></MultiSelect>
+                    <MultiSelect
+                        id="multiselect"
+                        :options="cities"
+                        v-model="value9"
+                        optionLabel="name"
+                        :filter="false"
+                    ></MultiSelect>
                     <label for="multiselect">MultiSelect</label>
                 </span>
             </div>
@@ -113,3 +82,46 @@ const searchCountry = (event) => {
         </div>
     </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue';
+import CountryService from '@/service/CountryService';
+
+const countries = ref([]);
+const cities = ref([
+    { name: 'New York', code: 'NY' },
+    { name: 'Rome', code: 'RM' },
+    { name: 'London', code: 'LDN' },
+    { name: 'Istanbul', code: 'IST' },
+    { name: 'Paris', code: 'PRS' }
+]);
+const filteredCountries = ref(null);
+const value1 = ref(null);
+const value2 = ref(null);
+const value3 = ref(null);
+const value4 = ref(null);
+const value5 = ref(null);
+const value6 = ref(null);
+const value7 = ref(null);
+const value8 = ref(null);
+const value9 = ref(null);
+const value10 = ref(null);
+const countryService = new CountryService();
+
+onMounted(() => {
+    countryService.getCountries().then((data) => (countries.value = data));
+});
+
+const searchCountry = (event) => {
+    //in a real application, make a request to a remote url with the query and return filtered results, for demo we filter at client side
+    const filtered = [];
+    const query = event.query;
+    for (let i = 0; i < countries.value.length; i++) {
+        const country = countries.value[i];
+        if (country.name.toLowerCase().indexOf(query.toLowerCase()) == 0) {
+            filtered.push(country);
+        }
+    }
+    filteredCountries.value = filtered;
+};
+</script>

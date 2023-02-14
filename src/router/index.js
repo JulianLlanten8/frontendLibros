@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
-import { guardsRoute, guardsLogin, checkRole } from './auth-guard';
+import { guardsRoute, guardsLogin /* checkRole */ } from './auth-guard';
 
 const router = createRouter({
     history: createWebHistory(),
