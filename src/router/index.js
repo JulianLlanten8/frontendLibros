@@ -6,6 +6,18 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         {
+            path: '/reset-password',
+            name: 'reset-password',
+            component: () => import('@/views/pages/auth/RecuperacionContrasena.vue'),
+            beforeEnter: [guardsLogin]
+        },
+        {
+            path: '/olvido-contrasena',
+            name: 'olvido-contrasena',
+            component: () => import('@/views/pages/auth/OlvidoContrasena.vue'),
+            beforeEnter: [guardsLogin]
+        },
+        {
             path: '/',
             name: 'login',
             component: () => import('@/views/pages/auth/Login.vue'),

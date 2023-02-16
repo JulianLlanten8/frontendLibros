@@ -4,12 +4,17 @@
             <div class="card">
                 <h5>Espacio para subir archivos</h5>
                 <FileUpload
-                    name="demo[]"
+                    name="excel"
                     url="./upload.php"
                     @upload="onUpload"
                     :multiple="true"
-                    accept="image/*"
+                    :accept="'application/vnd.ms-excel, .csv'"
                     :maxFileSize="1000000"
+                    invalidFileSizeMessage="El tamaño del archivo es demasiado grande"
+                    chooseLabel="Seleccionar"
+                    uploadLabel="Subir"
+                    cancelLabel="Cancelar"
+                    invalidFileTypeMessage="El tipo de archivo no es válido"
                 />
             </div>
         </div>

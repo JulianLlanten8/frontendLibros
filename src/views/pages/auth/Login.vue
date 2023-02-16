@@ -32,8 +32,10 @@
                                 for="email"
                                 class="block text-900 text-xl font-medium mb-2"
                                 :class="{ 'p-error': (v$.email.$invalid && submitted) || error }"
-                                >Correo Electronico <span class="text-red-500">*</span></label
                             >
+                                Correo Electronico
+                                <span class="text-red-500">*</span>
+                            </label>
                             <InputText
                                 id="email"
                                 type="text"
@@ -60,7 +62,7 @@
                     <div class="field">
                         <label
                             for="password"
-                            class="block text-900 font-medium text-xl mb-2"
+                            class="block text-900 font-medium text-xl"
                             :class="{ 'p-error': (v$.password.$invalid && submitted) || error }"
                             >Contraseña
                             <span class="text-red-500">*</span>
@@ -76,10 +78,7 @@
                             inputStyle="padding:1rem"
                         >
                         </Password>
-                        <small
-                            v-if="(v$.password.$invalid && submitted) || v$.password.$pending.$response || error"
-                            class="p-error"
-                        >
+                        <small v-if="v$.password.$invalid && submitted" class="p-error">
                             <!-- imprime el mensaje generado por -->
                             {{ v$.password.$errors[0].$message }}
                             <!-- {{ v$.password.$invalid && submitted ? 'La contraseña es requerida' : '' }}
@@ -87,9 +86,10 @@
                         </small>
                     </div>
 
-                    <div class="flex align-items-center justify-content-between gap-5 mb-2">
+                    <div class="flex align-items-center justify-content-between mb-5 gap-5">
                         <a
                             class="font-medium no-underline ml-2 text-right cursor-pointer"
+                            @click="router.push('/olvido-contrasena')"
                             style="color: var(--primary-color)"
                             >Olvido su Contraseña?
                         </a>

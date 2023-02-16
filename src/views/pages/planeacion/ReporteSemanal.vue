@@ -1,317 +1,250 @@
 <template>
     <div>
         <Toast />
-        <div class="card">
-            <h5>FC SEMANAL</h5>
-            <DataTable
-                :value="ejecucion"
-                rowGroupMode="subheader"
-                groupRowsBy="representative.name"
-                sortMode="single"
-                sortField="representative.name"
-                :sortOrder="1"
-                responsiveLayout="scroll"
-                :expandableRowGroups="true"
-                v-model:expandedRowGroups="expandedRowGroups"
-                @rowgroupExpand="onRowGroupExpand"
-                @rowgroupCollapse="onRowGroupCollapse"
-            >
-                <ColumnGroup type="header">
-                    <Row>
-                        <Column :rowspan="2">
-                            <template #header>
-                                <div class="p-d-flex p-jc-center">
-                                    <div class="p-mr-2">Fecha</div>
-                                    <Calendar
-                                        inputId="range"
-                                        v-model="rango"
-                                        :max-date="diaMaximo.max"
-                                        :min-date="diaMaximo.min"
-                                        selectionMode="range"
-                                        :manualInput="true"
-                                        :disabledDays="[0, 6]"
-                                    />
-                                </div>
+
+        <DataTable
+            :value="products"
+            v-model:expandedRows="expandedRows"
+            dataKey="id"
+            @rowExpand="onRowExpand"
+            @rowCollapse="onRowCollapse"
+            responsiveLayout="scroll"
+        >
+            <template #header>
+                <div class="table-header-container">
+                    <Button icon="pi pi-plus" label="Expand All" @click="expandAll" class="mr-2" />
+                    <Button icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
+                </div>
+            </template>
+            <Column :expander="true" headerStyle="width: 3rem" />
+            <Column field="nombre" header="Descripcion" sortable></Column>
+            <Column field="descripcion" header="Descripcion" sortable></Column>
+            <Column field="price" header="Ejecucion" sortable>
+                <template #body="slotProps">
+                    {{ formatCurrency(slotProps.data.price) }}
+                </template>
+            </Column>
+            <Column field="esperado" header="Esperado" sortable>
+                <template #body="slotProps">
+                    {{ formatCurrency(slotProps.data.esperado) }}
+                </template>
+            </Column>
+            <Column field="rating" header="Reviews" sortable>
+                <template #body="slotProps">
+                    <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" />
+                </template>
+            </Column>
+            <Column field="inventoryStatus" header="%" sortable>
+                <template #body="slotProps">
+                    <span :class="'product-badge status-' + slotProps.data.inventoryStatus.toLowerCase()">
+                        {{ slotProps.data.inventoryStatus }}
+                    </span>
+                </template>
+            </Column>
+            <template #expansion="slotProps">
+                <div v-if="slotProps.data.customers" class="orders-subtable">
+                    <DataTable
+                        :value="slotProps.data.customers"
+                        rowGroupMode="subheader"
+                        groupRowsBy="flujo.tipo"
+                        sortMode="single"
+                        sortField="flujo.tipo"
+                        :sortOrder="1"
+                        responsiveLayout="scroll"
+                        :expandableRowGroups="true"
+                        v-model:expandedRowGroups="expandedRowGroups"
+                        @rowgroupExpand="onRowGroupEx"
+                        @rowgroupCollapse="onRowGroupCollap"
+                    >
+                        <!-- cabecera del formulario de adentro -->
+                        <template #groupheader="slotProps">
+                            <span class="text-lg ml-1" :class="slotProps.data.flujo.color">
+                                {{ slotProps.data.flujo.tipo }}
+                            </span>
+                        </template>
+                        <!-- fin de la cabecera del formulario de adentro -->
+
+                        <!-- cabeceras -->
+                        <Column field="flujo.tipo" header="Representative"></Column>
+                        <Column field="tipo"></Column>
+                        <Column field="country">
+                            <template #body="slotProps">
+                                <img
+                                    src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
+                                    width="30"
+                                />
+                                <span class="image-text">{{ slotProps.data.country.name }}</span>
                             </template>
                         </Column>
-                        <Column header="Semana" :colspan="6" />
-                    </Row>
-                    <Row>
-                        <Column header="Semana (01-31) Dic" :colspan="6" />
-                    </Row>
-                    <Row>
-                        <Column field="representative.concepto" header="Concepto" />
-                        <Column field="representative.name" header="Nombre" :sortable="true" />
-                        <Column field="nombre" header="Descripcion" :sortable="true" />
-                        <Column field="ejecucion" header="Ejecucion" :sortable="true" />
-                        <Column field="esperado" header="Esperado" :sortable="true" />
-                        <Column field="porcentaje" header="%" :sortable="true" />
-                    </Row>
-                </ColumnGroup>
-                <Column field="representative.concepto" header="Concepto"></Column>
-                <Column field="representative.name" header="Representative"></Column>
-                <Column field="nombre" header="DESCRIPCION"></Column>
-                <Column field="ejecucion" header="EJECUCION"></Column>
-                <Column field="esperado" header="ESPERADO"></Column>
-                <Column field="porcentaje" header="%">
-                    <template #body="slotProps">
-                        <Tag :severity="`${escalaColor(slotProps.data.porcentaje)}`">
-                            {{ slotProps.data.porcentaje }} %
-                        </Tag>
-                    </template>
-                </Column>
-                <template #groupheader="slotProps">
-                    <img
-                        :alt="slotProps.data.representative.name"
-                        src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
-                        width="32"
-                        style="vertical-align: middle"
-                    />
-                    <span class="image-text">{{ slotProps.data.representative.name }}</span>
-                </template>
-                <template #groupfooter="slotProps">
-                    <td colspan="2">Total</td>
-                    <td>
-                        {{ $formatoMonedaCOP(calcularTotalEjecucion(slotProps.data.representative.name)) }}
-                    </td>
-                    <td>
-                        {{ $formatoMonedaCOP(calcularTotalEsperado(slotProps.data.representative.name)) }}
-                    </td>
-                    <td>
-                        <Tag :severity="`${escalaColor(calcularPorcentaje(slotProps.data.representative.name))}`">
-                            {{ calcularPorcentaje(slotProps.data.representative.name) }} %
-                        </Tag>
-                    </td>
-                </template>
-            </DataTable>
-        </div>
+                        <Column field="company" header="Company"></Column>
+                        <!-- cabeceras -->
+
+                        <Column field="status" header="status">
+                            <template #body="slotProps">
+                                <span :class="'customer-badge status-' + slotProps.data.status">
+                                    {{ slotProps.data.status }}
+                                </span>
+                            </template>
+                        </Column>
+
+                        <Column field="date" header="Date"></Column>
+
+                        <template #groupfooter="slotProps">
+                            <td colspan="4" style="text-align: right">Total Customers</td>
+                            <td>{{ calculateCustomerTotal(slotProps.data.flujo.tipo) }}</td>
+                        </template>
+                    </DataTable>
+                </div>
+            </template>
+        </DataTable>
     </div>
 </template>
 <script setup>
 import { ref, reactive } from 'vue';
 import { useToast } from 'primevue/usetoast';
-const expandedRowGroups = ref();
-const rango = ref();
-const diaMaximo = reactive({
-    min: reactive(new Date(2020, 11, 1)),
-    max: reactive(new Date(new Date() + 1))
-});
+
 const toast = useToast();
-const calcularPorcentaje = (name) => {
-    let porcentaje = 0;
-    let promedio = 0;
+const onRowGroupEx = (event) => {
+    toast.add({
+        severity: 'info',
+        summary: 'Group Expanded',
+        detail: 'Value: ' + event.data,
+        life: 3000
+    });
+};
+const onRowGroupCollap = (event) => {
+    toast.add({ severity: 'success', summary: 'Group Collapsed', detail: 'Value: ' + event.data, life: 3000 });
+};
+const expandedRowGroups = ref();
 
-    if (ejecucion.value) {
-        for (let customer of ejecucion.value) {
-            if (customer.representative.name === name) {
-                porcentaje += customer.porcentaje;
-                promedio++;
+const calculateCustomerTotal = (name) => {
+    let total = 0;
+
+    if (customers.value) {
+        for (let customer of customers.value) {
+            if (customer.flujo.tipo === name) {
+                total++;
             }
         }
     }
 
-    return Math.round(porcentaje / promedio);
-};
-const calcularTotalEjecucion = (name) => {
-    let ejecucion = 0;
-
-    if (ejecucion.value) {
-        for (let customer of ejecucion.value) {
-            if (customer.representative.name === name) {
-                ejecucion += customer.ejecucion;
-            }
-        }
-    }
-
-    return ejecucion;
+    return total;
 };
 
-const calcularTotalEsperado = (name) => {
-    let esperado = 0;
-
-    if (ejecucion.value) {
-        for (let customer of ejecucion.value) {
-            if (customer.representative.name === name) {
-                esperado += customer.esperado;
-            }
-        }
-    }
-
-    return esperado;
+const expandedRows = ref([]);
+const onRowExpand = (event) => {
+    toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.nombre, life: 3000 });
 };
-
-const escalaColor = (porcentaje) => {
-    if (porcentaje >= 80) return 'success';
-    if (porcentaje >= 1) return 'warning';
-    if (porcentaje == 0) return 'info';
-    return 'danger';
+const onRowCollapse = (event) => {
+    toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.nombre, life: 3000 });
 };
-
-const onRowGroupExpand = (event) => {
-    toast.add({ severity: 'info', summary: 'Row Group Expanded', detail: 'Value: ' + event.data, life: 3000 });
+const expandAll = () => {
+    expandedRows.value = products.filter((p) => p.id);
+    toast.add({ severity: 'success', summary: 'All Rows Expanded', life: 3000 });
 };
-const onRowGroupCollapse = (event) => {
-    toast.add({ severity: 'success', summary: 'Row Group Collapsed', detail: 'Value: ' + event.data, life: 3000 });
+const collapseAll = () => {
+    expandedRows.value = null;
+    toast.add({ severity: 'success', summary: 'All Rows Collapsed', life: 3000 });
 };
-const ejecucion = ref([
+const formatCurrency = (value) => {
+    return value.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+};
+const customers = ref([
     {
-        id: 1000,
+        id: '1000',
+        name: 'RECAUDOS DE CARTERA',
+        country: { name: 'USA', code: 'us' },
+        company: 'Anderson Co',
+        date: '2012/01/01',
+        status: 'qualified',
+        flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
+    },
+    {
+        id: '1001',
+        name: 'PRESTAMOS BANCARIOS RECIBIDOS',
+        country: { name: 'USA', code: 'us' },
+        company: 'Davolio Co',
+        date: '2012/02/01',
+        status: 'unqualified',
+        flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
+    },
+    {
+        id: '1002',
+        name: 'INTERESES RECIBIDOS',
+        country: { name: 'USA', code: 'us' },
+        company: 'Davolio Co',
+        date: '2012/02/01',
+        status: 'unqualified',
+        flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
+    },
+    {
+        id: '1003',
+        name: 'Michael Leverling',
+        country: { name: 'Canada', code: 'ca' },
+        company: 'Leverling Co',
+        date: '2012/03/01',
+        status: 'qualified',
+        flujo: { tipo: 'EGRESOS', color: 'text-red-500' }
+    },
+    {
+        id: '1005',
+        name: 'Janet Leverling',
+        country: { name: 'Canada', code: 'ca' },
+        company: 'Leverling Co',
+        date: '2012/03/01',
+        status: 'qualified',
+        flujo: { tipo: 'EGRESOS', color: 'text-red-500' }
+    }
+]);
+
+const products = reactive([
+    {
+        id: '1000',
+        code: 'f230fh0g3',
         nombre: 'SALDO INICIAL',
-        ejecucion: 2763672789,
-        esperado: 2763672789,
-        porcentaje: 100,
-        representative: {
-            name: 'SALDO INICIAL',
-            image: 'ionibowcher.png'
-        }
+        descripcion: '',
+        price: 268224245803,
+        esperado: 36822424583,
+        quantity: 24,
+        inventoryStatus: '',
+        rating: 0,
+        customers: null
     },
     {
-        id: 1001,
-        nombre: 'RECAUDOS FEE PAO',
-        ejecucion: 1700763213,
-        esperado: 1788523079,
-        porcentaje: 95,
-        representative: {
-            name: 'ACTIVIDAD DE OPERACION',
-            image: 'amyelsner.png'
-        }
+        id: '1001',
+        code: 'nvklal433',
+        nombre: 'ACTIVIDAD DE OPERACION',
+        descripcion: 'Product Description',
+        price: 72,
+        esperado: 685438974,
+        quantity: 61,
+        inventoryStatus: 'INSTOCK',
+        rating: 4,
+        customers: customers.value
     },
     {
-        id: 1002,
-        nombre: 'CAPEX TICAPEX TI (LICENCIAS)',
-        ejecucion: 123,
-        esperado: 1381836394,
-        porcentaje: 95,
-        representative: {
-            name: 'ACTIVIDAD DE INVERSION',
-            image: 'asiyajavayant.png'
-        }
+        id: '1002',
+        code: 'zz21cz3c1',
+        nombre: 'ACTIVIDAD DE INVERSION',
+        descripcion: 'Product Description',
+        price: 79,
+        esperado: 1083233434,
+        quantity: 2,
+        inventoryStatus: 'LOWSTOCK',
+        rating: 3,
+        customers: customers.value
     },
     {
-        id: 1002,
-        nombre: 'CAPEX RECOBRO',
-        ejecucion: 123,
-        esperado: 12581836394,
-        porcentaje: 95,
-        representative: {
-            name: 'ACTIVIDAD DE INVERSION',
-            image: 'asiyajavayant.png'
-        }
-    },
-    //tres
-    {
-        id: 1003,
-        nombre: 'RECAUDOS FEE PAO',
-        ejecucion: 123,
-        esperado: 1000000,
-        porcentaje: 100,
-        representative: {
-            name: 'ACTIVIDAD DE FINANCIACION',
-            image: 'xuxuefeng.png'
-        }
-    },
-    {
-        id: 1003,
-        nombre: 'RECAUDOS FEE CS-CC',
-        ejecucion: 123,
-        esperado: 4356121315,
-        porcentaje: 0,
-        representative: {
-            name: 'ACTIVIDAD DE FINANCIACION',
-            image: 'xuxuefeng.png'
-        },
-        balance: 88521
-    },
-    {
-        id: 1003,
-        nombre: 'OTROS RECAUDOS',
-        ejecucion: 123,
-        esperado: 871224263,
-        porcentaje: 80,
-        representative: {
-            name: 'ACTIVIDAD DE FINANCIACION',
-            image: 'xuxuefeng.png'
-        }
-    },
-
-    //tres fin
-
-    {
-        id: 1004,
-        nombre: 'PAGO DE IVA',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 86,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1004,
-        nombre: 'PAGO DE RETENCIÓN EN LA FUENTE',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 62,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1004,
-        nombre: 'PAGO DE IMPUESTOS (RENTA, CREE Y RIQUEZA)',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 86,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1004,
-        nombre: 'PAGO DE OTROS EGRESOS',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 86,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1005,
-        nombre: 'FLUJO NETO',
-        ejecucion: 112685229,
-        esperado: 478279839,
-        porcentaje: -92,
-        representative: {
-            name: 'FLUJO NETO',
-            image: 'ivanmagalhaes.png'
-        }
-    },
-    {
-        id: 1006,
-        nombre: 'SALDO DE CAJA FINAL',
-        ejecucion: 2876358018,
-        esperado: 2713672789,
-        porcentaje: 0,
-        representative: {
-            name: 'SALDO DE CAJA FINAL',
-            image: 'ivanmagalhaes.png'
-        }
-    },
-    {
-        id: 1007,
-        nombre: 'Leota Dilliard',
-        ejecucion: 2285392950,
-        esperado: 72789,
-        porcentaje: 144,
-        representative: {
-            name: 'Sobregiro SEC',
-            image: 'onyamalimba.png'
-        }
+        id: '1005',
+        code: 'av2231fwg',
+        nombre: 'ACTIVIDAD DE FINANCIACION',
+        descripcion: 'Product Description',
+        price: 120,
+        esperado: 1083233434,
+        quantity: 0,
+        inventoryStatus: 'OUTOFSTOCK',
+        rating: 4,
+        customers: customers.value
     }
 ]);
 </script>

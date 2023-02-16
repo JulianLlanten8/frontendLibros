@@ -297,7 +297,6 @@ import { obtenerTodo } from '@/service/clienteHttp';
 const obtenerDatosUsuario = async () => {
     if (sessionStorage.getItem('token')) {
         await obtenerTodo('usuario/obtenerDatosUsuario').then((response) => {
-            console.log(response);
             sessionStorage.setItem('datosUsuario', JSON.stringify(response));
             return response;
         });
