@@ -11,14 +11,15 @@
             responsiveLayout="scroll"
         >
             <template #header>
-                <div class="table-header-container">
-                    <Button icon="pi pi-plus" label="Expand All" @click="expandAll" class="mr-2" />
-                    <Button icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
+                <div class="table-header-container flex justify-content-end">
+                    <Button icon="pi pi-plus" label="Expandir todo" @click="expandAll" class="mr-2" />
+                    <Button icon="pi pi-minus" label="Colapsar todo" @click="collapseAll" />
+                    <Button icon="pi pi-minus" label="Descargar Archivo" class="flex-wrap"></Button>
                 </div>
             </template>
             <Column :expander="true" headerStyle="width: 3rem" />
+            <Column field="id" header="Concepto" sortable></Column>
             <Column field="nombre" header="Descripcion" sortable></Column>
-            <Column field="descripcion" header="Descripcion" sortable></Column>
             <Column field="price" header="Ejecucion" sortable>
                 <template #body="slotProps">
                     {{ formatCurrency(slotProps.data.price) }}
@@ -29,18 +30,12 @@
                     {{ formatCurrency(slotProps.data.esperado) }}
                 </template>
             </Column>
-            <Column field="rating" header="Reviews" sortable>
+            <!-- <Column field="rating" header="Reviews" sortable>
                 <template #body="slotProps">
                     <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" />
                 </template>
-            </Column>
-            <Column field="inventoryStatus" header="%" sortable>
-                <template #body="slotProps">
-                    <span :class="'product-badge status-' + slotProps.data.inventoryStatus.toLowerCase()">
-                        {{ slotProps.data.inventoryStatus }}
-                    </span>
-                </template>
-            </Column>
+            </Column> -->
+            <Column field="cumplimientoGlobal" header="cumplimiento %" sortable></Column>
             <template #expansion="slotProps">
                 <div v-if="slotProps.data.customers" class="orders-subtable">
                     <DataTable
@@ -65,34 +60,22 @@
                         <!-- fin de la cabecera del formulario de adentro -->
 
                         <!-- cabeceras -->
-                        <Column field="flujo.tipo" header="Representative"></Column>
-                        <Column field="tipo"></Column>
+                        <Column field="id" header="Concepto"></Column>
                         <Column field="country">
                             <template #body="slotProps">
-                                <img
-                                    src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
-                                    width="30"
-                                />
-                                <span class="image-text">{{ slotProps.data.country.name }}</span>
+                                <span class="image-text">{{ slotProps.data.descripciones }}</span>
                             </template>
                         </Column>
-                        <Column field="company" header="Company"></Column>
+
+                        <Column field="ejecucion" header="Ejecucion"></Column>
+                        <Column field="esperado" header="Esperado"></Column>
+
+                        <Column field="cumplimiento" header="Cumplimiento"></Column>
                         <!-- cabeceras -->
-
-                        <Column field="status" header="status">
-                            <template #body="slotProps">
-                                <span :class="'customer-badge status-' + slotProps.data.status">
-                                    {{ slotProps.data.status }}
-                                </span>
-                            </template>
-                        </Column>
-
-                        <Column field="date" header="Date"></Column>
-
-                        <template #groupfooter="slotProps">
-                            <td colspan="4" style="text-align: right">Total Customers</td>
+                        <!-- <template #groupfooter="slotProps">
+                            <td colspan="5" style="text-align: right">Total Customers</td>
                             <td>{{ calculateCustomerTotal(slotProps.data.flujo.tipo) }}</td>
-                        </template>
+                        </template> -->
                     </DataTable>
                 </div>
             </template>
@@ -152,98 +135,90 @@ const formatCurrency = (value) => {
 const customers = ref([
     {
         id: '1000',
-        name: 'RECAUDOS DE CARTERA',
+        descripciones: 'RECAUDOS DE CARTERA',
         country: { name: 'USA', code: 'us' },
-        company: 'Anderson Co',
-        date: '2012/01/01',
-        status: 'qualified',
+        ejecucion: 276367278,
+        cumplimiento: '0%',
+        esperado: 4000200500,
         flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
     },
     {
         id: '1001',
-        name: 'PRESTAMOS BANCARIOS RECIBIDOS',
+        descripciones: 'PRESTAMOS BANCARIOS RECIBIDOS',
         country: { name: 'USA', code: 'us' },
-        company: 'Davolio Co',
-        date: '2012/02/01',
-        status: 'unqualified',
+        ejecucion: 276367278,
+        cumplimiento: '-24%',
+        esperado: 4000200500,
         flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
     },
     {
         id: '1002',
-        name: 'INTERESES RECIBIDOS',
+        descripciones: 'INTERESES RECIBIDOS',
         country: { name: 'USA', code: 'us' },
-        company: 'Davolio Co',
-        date: '2012/02/01',
-        status: 'unqualified',
+        ejecucion: 276367278,
+        cumplimiento: '126%',
+        esperado: 4000200500,
         flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
     },
     {
         id: '1003',
-        name: 'Michael Leverling',
+        descripciones: 'Michael Leverling',
         country: { name: 'Canada', code: 'ca' },
-        company: 'Leverling Co',
-        date: '2012/03/01',
-        status: 'qualified',
+        ejecucion: 276367278,
+        cumplimiento: '85%',
+        esperado: 4000200500,
         flujo: { tipo: 'EGRESOS', color: 'text-red-500' }
     },
     {
         id: '1005',
-        name: 'Janet Leverling',
+        descripciones: 'Janet Leverling',
         country: { name: 'Canada', code: 'ca' },
-        company: 'Leverling Co',
-        date: '2012/03/01',
-        status: 'qualified',
+        ejecucion: 276367278,
+        cumplimiento: '92%',
+        esperado: 4000200500,
         flujo: { tipo: 'EGRESOS', color: 'text-red-500' }
     }
 ]);
 
 const products = reactive([
     {
-        id: '1000',
+        id: '1',
         code: 'f230fh0g3',
         nombre: 'SALDO INICIAL',
-        descripcion: '',
         price: 268224245803,
         esperado: 36822424583,
         quantity: 24,
-        inventoryStatus: '',
-        rating: 0,
+        cumplimientoGlobal: '100%',
         customers: null
     },
     {
-        id: '1001',
+        id: '02',
         code: 'nvklal433',
         nombre: 'ACTIVIDAD DE OPERACION',
-        descripcion: 'Product Description',
         price: 72,
         esperado: 685438974,
         quantity: 61,
-        inventoryStatus: 'INSTOCK',
-        rating: 4,
+        cumplimientoGlobal: '100%',
         customers: customers.value
     },
     {
-        id: '1002',
+        id: '03',
         code: 'zz21cz3c1',
         nombre: 'ACTIVIDAD DE INVERSION',
-        descripcion: 'Product Description',
         price: 79,
         esperado: 1083233434,
         quantity: 2,
-        inventoryStatus: 'LOWSTOCK',
-        rating: 3,
+        cumplimientoGlobal: '100%',
         customers: customers.value
     },
     {
-        id: '1005',
+        id: '04',
         code: 'av2231fwg',
         nombre: 'ACTIVIDAD DE FINANCIACION',
-        descripcion: 'Product Description',
         price: 120,
         esperado: 1083233434,
         quantity: 0,
-        inventoryStatus: 'OUTOFSTOCK',
-        rating: 4,
+        cumplimientoGlobal: '100%',
         customers: customers.value
     }
 ]);
