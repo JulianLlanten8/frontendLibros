@@ -37,14 +37,18 @@ const obtenerTodo = async (RUTA) => {
 };
 /**
  * Envía una solicitud POST para crear a la ruta especificada con los datos especificados y devuelve los datos de respuesta.
- * @param data - TLos datos a enviar al servidor.
+ * @param data - Los datos a enviar al servidor.
  * @param ruta {String} - La ruta de la api.
  * @param content {String} - El tipo de formato que se le envia ala api.
  * @returns {(Promise | Array )} Los datos de respuesta del servidor.
  */
-const crear = async (RUTA, DATA, CONTENT) => {
+const crear = async (RUTA, DATA, CONTENT = null) => {
     try {
-        DATA.id_user_log = sessionStorage.getItem('id').id;
+        let user = sessionStorage.getItem('USER');
+
+        DATA.id_user_log = JSON.parse(user).id;
+
+        let token = sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null;
         if (CONTENT == 'json') {
             const respuesta = await axios.post(`${RUTA}`, DATA, {
                 headers: {
@@ -57,12 +61,12 @@ const crear = async (RUTA, DATA, CONTENT) => {
         const respuesta = await axios.post(`${RUTA}`, DATA, {
             headers: {
                 'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null}`
+                Authorization: `Bearer ${token}`
             }
         });
         return respuesta.statusText;
     } catch (error) {
-        return error.response.statusText;
+        return error;
     }
 };
 /**
@@ -74,9 +78,10 @@ const crear = async (RUTA, DATA, CONTENT) => {
 const actualizar = async (RUTA, DATA) => {
     try {
         DATA.id_user_log = sessionStorage.getItem('id').id;
-        const respuesta = await axios.put(`${RUTA}?_method=PUT`, DATA, {
+        const respuesta = await axios.put(`${RUTA}`, DATA, {
             headers: {
-                Authorization: `Bearer ${sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null}`
+                Authorization: `Bearer 
+                ${sessionStorage.getItem(JSON.parse('USER')) ? sessionStorage.getItem(JSON.parse('USER')) : null}`
             }
         });
         return respuesta.statusText;
