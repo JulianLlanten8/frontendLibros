@@ -31,16 +31,11 @@ const toast = useToast();
 const onUpload = () => {
     toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
 };
-onload = () => {
-    console.log('hola');
-};
 
 const subirArchivo = async (event) => {
     let archivo = event.files[0];
-    console.log(archivo);
-    await crear('/archivos/crear', { archivo: archivo })
+    await crear('/archivos/crear', { archivo: archivo }, 'multipart/form-data')
         .then((response) => {
-            console.log(response);
             return response;
         })
         .catch((error) => {

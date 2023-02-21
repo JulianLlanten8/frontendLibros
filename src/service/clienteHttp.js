@@ -23,12 +23,13 @@ const obtenerPorId = async (RUTA, ID) => {
  * @param ruta {String} - La ruta a la API.
  * @returns {(Promise  | JSON)} Los datos de la respuesta.
  */
-const obtenerTodo = async (RUTA) => {
+const obtenerTodo = async (RUTA, Type = null) => {
     try {
         const respuesta = await axios.get(`${RUTA}`, {
             headers: {
                 Authorization: `Bearer ${sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null}`
-            }
+            },
+            responseType: Type
         });
         return respuesta.data;
     } catch (error) {
@@ -49,19 +50,11 @@ const crear = async (RUTA, DATA, CONTENT = null) => {
         DATA.id_user_log = JSON.parse(user).id;
 
         let token = sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null;
-        if (CONTENT == 'json') {
-            const respuesta = await axios.post(`${RUTA}`, DATA, {
-                headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            return respuesta.statusText;
-        }
+
         const respuesta = await axios.post(`${RUTA}`, DATA, {
             headers: {
-                'Content-Type': 'multipart/form-data',
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': CONTENT
             }
         });
         return respuesta.statusText;

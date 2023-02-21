@@ -1,225 +1,337 @@
 <template>
     <div>
-        <Toast />
-
-        <DataTable
-            :value="products"
-            v-model:expandedRows="expandedRows"
-            dataKey="id"
-            @rowExpand="onRowExpand"
-            @rowCollapse="onRowCollapse"
-            responsiveLayout="scroll"
-        >
+        <div style="margin-bottom: 1em">
+            <SelectButton v-model="value1" :options="options" aria-labelledby="single" @change="e" />
+        </div>
+        <TreeTable :value="nodes" :expandedKeys="expandedKeys" :filters="filters1" filterMode="lenient">
             <template #header>
-                <div class="table-header-container flex justify-content-end">
-                    <Button icon="pi pi-plus" label="Expandir todo" @click="expandAll" class="mr-2" />
-                    <Button icon="pi pi-minus" label="Colapsar todo" @click="collapseAll" />
-                    <Button icon="pi pi-minus" label="Descargar Archivo" class="flex-wrap"></Button>
+                Flujo de caja semanal :
+                <Dropdown
+                    v-model="selectedCity2"
+                    :options="cities"
+                    optionLabel="name"
+                    :editable="true"
+                    placeholder="Selecione una sociedad"
+                />
+                <div class="text-right">
+                    <div class="p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <InputText v-model="filters1['global']" placeholder="Busqueda ..." size="50" />
+                    </div>
                 </div>
             </template>
-            <Column :expander="true" headerStyle="width: 3rem" />
-            <Column field="id" header="Concepto" sortable></Column>
-            <Column field="nombre" header="Descripcion" sortable></Column>
-            <Column field="price" header="Ejecucion" sortable>
-                <template #body="slotProps">
-                    {{ formatCurrency(slotProps.data.price) }}
+            <Column field="concepto" header="Concepto" headerStyle="width: 10%"></Column>
+            <Column
+                field="descripcion"
+                header="Descripcion"
+                headerStyle="w-auto  white-space-nowrap overflow-hidden text-overflow-ellipsis"
+                :expander="true"
+            ></Column>
+            <Column field="ejecucion" header="Ejecucion" headerStyle="width: 20%"></Column>
+            <Column field="esperado" header="Esperados" headerStyle="width: 20%"></Column>
+            <Column field="cumplimiento" header="Cumplimiento %" headerStyle="width: 10%"></Column>
+            <!-- <Column headerStyle="width: 10rem" headerClass="text-center" bodyClass="text-center">
+                <template #header>
+                    <Button type="button" icon="pi pi-download"></Button>
                 </template>
-            </Column>
-            <Column field="esperado" header="Esperado" sortable>
-                <template #body="slotProps">
-                    {{ formatCurrency(slotProps.data.esperado) }}
-                </template>
-            </Column>
-            <!-- <Column field="rating" header="Reviews" sortable>
-                <template #body="slotProps">
-                    <Rating :modelValue="slotProps.data.rating" :readonly="true" :cancel="false" />
+                <template #body>
+                    <Button
+                        type="button"
+                        icon="pi pi-search"
+                        class="p-button-success"
+                        style="margin-right: 0.5em"
+                    ></Button>
+                    <Button type="button" icon="pi pi-pencil" class="p-button-warning"></Button>
                 </template>
             </Column> -->
-            <Column field="cumplimientoGlobal" header="cumplimiento %" sortable></Column>
-            <template #expansion="slotProps">
-                <div v-if="slotProps.data.customers" class="orders-subtable">
-                    <DataTable
-                        :value="slotProps.data.customers"
-                        rowGroupMode="subheader"
-                        groupRowsBy="flujo.tipo"
-                        sortMode="single"
-                        sortField="flujo.tipo"
-                        :sortOrder="1"
-                        responsiveLayout="scroll"
-                        :expandableRowGroups="true"
-                        v-model:expandedRowGroups="expandedRowGroups"
-                        @rowgroupExpand="onRowGroupEx"
-                        @rowgroupCollapse="onRowGroupCollap"
-                    >
-                        <!-- cabecera del formulario de adentro -->
-                        <template #groupheader="slotProps">
-                            <span class="text-lg ml-1" :class="slotProps.data.flujo.color">
-                                {{ slotProps.data.flujo.tipo }}
-                            </span>
-                        </template>
-                        <!-- fin de la cabecera del formulario de adentro -->
-
-                        <!-- cabeceras -->
-                        <Column field="id" header="Concepto"></Column>
-                        <Column field="country">
-                            <template #body="slotProps">
-                                <span class="image-text">{{ slotProps.data.descripciones }}</span>
-                            </template>
-                        </Column>
-
-                        <Column field="ejecucion" header="Ejecucion"></Column>
-                        <Column field="esperado" header="Esperado"></Column>
-
-                        <Column field="cumplimiento" header="Cumplimiento"></Column>
-                        <!-- cabeceras -->
-                        <!-- <template #groupfooter="slotProps">
-                            <td colspan="5" style="text-align: right">Total Customers</td>
-                            <td>{{ calculateCustomerTotal(slotProps.data.flujo.tipo) }}</td>
-                        </template> -->
-                    </DataTable>
+            <template #footer>
+                <div style="text-align: center">
+                    <Button icon="pi pi-download" @click="imprimir" />
                 </div>
             </template>
-        </DataTable>
+        </TreeTable>
     </div>
 </template>
 <script setup>
-import { ref, reactive } from 'vue';
-import { useToast } from 'primevue/usetoast';
+import { ref /* reactive */ } from 'vue';
+// import { useToast } from 'primevue/usetoast';
+import { obtenerTodo } from '@/service/clienteHttp';
 
-const toast = useToast();
-const onRowGroupEx = (event) => {
-    toast.add({
-        severity: 'info',
-        summary: 'Group Expanded',
-        detail: 'Value: ' + event.data,
-        life: 3000
-    });
+const expandedKeys = ref({});
+const filters1 = ref({});
+const value1 = ref('Off');
+const options = ref(['Off', 'On']);
+// const toast = useToast();
+
+const imprimir = async () => {
+    const res = await obtenerTodo('archivos/descargar', 'blob');
+    const url = URL.createObjectURL(new Blob([res], { type: 'application/vnd.ms-excel' }));
+
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.setAttribute('download', 'flujos.xlsx');
+    document.body.appendChild(link);
+    link.click();
 };
-const onRowGroupCollap = (event) => {
-    toast.add({ severity: 'success', summary: 'Group Collapsed', detail: 'Value: ' + event.data, life: 3000 });
-};
-const expandedRowGroups = ref();
 
-const calculateCustomerTotal = (name) => {
-    let total = 0;
-
-    if (customers.value) {
-        for (let customer of customers.value) {
-            if (customer.flujo.tipo === name) {
-                total++;
-            }
-        }
+const e = (e) => {
+    if (e.value === 'On') {
+        expandAll();
+    } else if (e.value === 'Off') {
+        collapseAll();
     }
-
-    return total;
-};
-
-const expandedRows = ref([]);
-const onRowExpand = (event) => {
-    toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.nombre, life: 3000 });
-};
-const onRowCollapse = (event) => {
-    toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.nombre, life: 3000 });
 };
 const expandAll = () => {
-    expandedRows.value = products.filter((p) => p.id);
-    toast.add({ severity: 'success', summary: 'All Rows Expanded', life: 3000 });
-};
-const collapseAll = () => {
-    expandedRows.value = null;
-    toast.add({ severity: 'success', summary: 'All Rows Collapsed', life: 3000 });
-};
-const formatCurrency = (value) => {
-    return value.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
-};
-const customers = ref([
-    {
-        id: '1000',
-        descripciones: 'RECAUDOS DE CARTERA',
-        country: { name: 'USA', code: 'us' },
-        ejecucion: 276367278,
-        cumplimiento: '0%',
-        esperado: 4000200500,
-        flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
-    },
-    {
-        id: '1001',
-        descripciones: 'PRESTAMOS BANCARIOS RECIBIDOS',
-        country: { name: 'USA', code: 'us' },
-        ejecucion: 276367278,
-        cumplimiento: '-24%',
-        esperado: 4000200500,
-        flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
-    },
-    {
-        id: '1002',
-        descripciones: 'INTERESES RECIBIDOS',
-        country: { name: 'USA', code: 'us' },
-        ejecucion: 276367278,
-        cumplimiento: '126%',
-        esperado: 4000200500,
-        flujo: { tipo: 'INGRESOS', color: 'text-green-500' }
-    },
-    {
-        id: '1003',
-        descripciones: 'Michael Leverling',
-        country: { name: 'Canada', code: 'ca' },
-        ejecucion: 276367278,
-        cumplimiento: '85%',
-        esperado: 4000200500,
-        flujo: { tipo: 'EGRESOS', color: 'text-red-500' }
-    },
-    {
-        id: '1005',
-        descripciones: 'Janet Leverling',
-        country: { name: 'Canada', code: 'ca' },
-        ejecucion: 276367278,
-        cumplimiento: '92%',
-        esperado: 4000200500,
-        flujo: { tipo: 'EGRESOS', color: 'text-red-500' }
+    for (let node of nodes.value) {
+        expandNode(node);
     }
+
+    expandedKeys.value = { ...expandedKeys.value };
+};
+
+const collapseAll = () => {
+    expandedKeys.value = {};
+};
+
+const expandNode = (node) => {
+    if (node.children && node.children.length) {
+        expandedKeys.value[node.key] = true;
+
+        for (let child of node.children) {
+            expandNode(child);
+        }
+    }
+};
+const selectedCity2 = ref(null);
+const cities = ref([
+    { name: 'New York', code: 'NY' },
+    { name: 'Rome', code: 'RM' },
+    { name: 'London', code: 'LDN' },
+    { name: 'Istanbul', code: 'IST' },
+    { name: 'Paris', code: 'PRS' }
 ]);
 
-const products = reactive([
+const nodes = ref([
     {
-        id: '1',
-        code: 'f230fh0g3',
-        nombre: 'SALDO INICIAL',
-        price: 268224245803,
-        esperado: 36822424583,
-        quantity: 24,
-        cumplimientoGlobal: '100%',
-        customers: null
+        key: '0',
+        data: {
+            concepto: '0',
+            descripcion: 'Saldo Inicial',
+            ejecucion: 2763672789,
+            esperado: 2763672789,
+            cumplimiento: 80
+        }
     },
     {
-        id: '02',
-        code: 'nvklal433',
-        nombre: 'ACTIVIDAD DE OPERACION',
-        price: 72,
-        esperado: 685438974,
-        quantity: 61,
-        cumplimientoGlobal: '100%',
-        customers: customers.value
+        key: '1',
+        data: {
+            concepto: '1',
+            descripcion: 'Actividad de operacion',
+            ejecucion: 340583856,
+            esperado: 420368907,
+            cumplimiento: -81
+        },
+        children: [
+            {
+                key: '1-0',
+                data: {
+                    concepto: 1,
+                    descripcion: 'Ingresos',
+                    ejecucion: 340583856,
+                    esperado: 420368907,
+                    cumplimiento: 81
+                },
+                children: [
+                    {
+                        key: '1-0-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'Recaudos Fee Pao',
+                            ejecucion: 240532926,
+                            esperado: 241000000,
+                            cumplimiento: 100
+                        }
+                    },
+                    {
+                        key: '1-0-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'OTROS RECAUDOS',
+                            ejecucion: 520348294,
+                            esperado: '-',
+                            cumplimiento: 100
+                        }
+                    }
+                ]
+            },
+            {
+                key: '0-1',
+                data: {
+                    concepto: 1,
+                    descripcion: 'Egresos',
+                    ejecucion: 0,
+                    esperado: 'Folder',
+                    cumplimiento: 80
+                },
+                children: [
+                    {
+                        key: '0-1-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE NOMINA',
+                            ejecucion: 1727272090,
+                            esperado: 2004118053,
+                            cumplimiento: 86
+                        }
+                    },
+                    {
+                        key: '0-1-1',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE HONORARIOS',
+                            ejecucion: '10kb',
+                            esperado: 'Application',
+                            cumplimiento: 80
+                        }
+                    },
+                    {
+                        key: '0-1-2',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE IMPUESTOS',
+                            ejecucion: '-',
+                            esperado: 10418944,
+                            cumplimiento: 0
+                        }
+                    }
+                ]
+            }
+        ]
     },
     {
-        id: '03',
-        code: 'zz21cz3c1',
-        nombre: 'ACTIVIDAD DE INVERSION',
-        price: 79,
-        esperado: 1083233434,
-        quantity: 2,
-        cumplimientoGlobal: '100%',
-        customers: customers.value
+        key: '02',
+        data: {
+            concepto: '02',
+            descripcion: 'Actividad de inversion',
+            ejecucion: -220.15,
+            esperado: -30072080,
+            cumplimiento: 1
+        },
+        children: [
+            {
+                key: '4-0',
+                data: {
+                    concepto: 1,
+                    descripcion: 'Egresos',
+                    ejecucion: 2121060577,
+                    esperado: 2449891985,
+                    cumplimiento: 87
+                },
+                children: [
+                    {
+                        key: '4-0-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'CAPEX TI (LICENCIAS)',
+                            ejecucion: '-',
+                            esperado: 30072080,
+                            cumplimiento: 0
+                        }
+                    },
+                    {
+                        key: '4-0-1',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'CAPEX RECOBRO',
+                            ejecucion: 220150,
+                            esperado: '-',
+                            cumplimiento: 0
+                        }
+                    }
+                ]
+            }
+        ]
     },
     {
-        id: '04',
-        code: 'av2231fwg',
-        nombre: 'ACTIVIDAD DE FINANCIACION',
-        price: 120,
-        esperado: 1083233434,
-        quantity: 0,
-        cumplimientoGlobal: '100%',
-        customers: customers.value
+        key: '03',
+        data: {
+            concepto: '03',
+            descripcion: 'Actividad de financiacion',
+            ejecucion: 340583856,
+            esperado: 420368907,
+            cumplimiento: -81
+        },
+        children: [
+            {
+                key: '3-0',
+                data: { concepto: 1, descripcion: 'Ingresos', ejecucion: '25kb', esperado: 'Folder', cumplimiento: 80 },
+                children: [
+                    {
+                        key: '3-0-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PRESTAMOS DE PARTICULARES RECIBIDOS',
+                            ejecucion: '-',
+                            esperado: '-',
+                            cumplimiento: 0
+                        }
+                    }
+                ]
+            },
+            {
+                key: '3-0-0',
+                data: {
+                    concepto: 1,
+                    descripcion: 'Egresos',
+                    ejecucion: '25kb',
+                    esperado: 'Folder',
+                    cumplimiento: 80
+                },
+                children: [
+                    {
+                        key: '3-1-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE INTERESES',
+                            ejecucion: '-',
+                            esperado: '-',
+                            cumplimiento: 0
+                        }
+                    },
+                    {
+                        key: '3-1-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE COMISIONES',
+                            ejecucion: '10kb',
+                            esperado: 'Application',
+                            cumplimiento: 80
+                        }
+                    },
+                    {
+                        key: '3-1-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE OBLIGACIÓN - AMORTIZACIÓN A CAPITAL',
+                            ejecucion: '-',
+                            esperado: 10418944,
+                            cumplimiento: 0
+                        }
+                    },
+                    {
+                        key: '3-2-0',
+                        data: {
+                            concepto: 1,
+                            descripcion: 'PAGO DE GASTOS BANCARIOS',
+                            ejecucion: 5728365,
+                            esperado: '-',
+                            cumplimiento: 0
+                        }
+                    }
+                ]
+            }
+        ]
     }
 ]);
 </script>
