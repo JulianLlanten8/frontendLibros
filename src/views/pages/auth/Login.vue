@@ -17,7 +17,7 @@
                     style="border-radius: 53px"
                 >
                     <div class="text-center mb-5">
-                        <div class="text-900 text-3xl font-medium mb-3">Facturacion y cartera</div>
+                        <div class="text-900 text-3xl font-medium mb-3">Planeacion</div>
                         <span class="text-600 font-medium">Inicia sesión para continuar</span>
                     </div>
                     <div class="col-12">

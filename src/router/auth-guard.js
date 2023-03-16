@@ -46,4 +46,4 @@ const checkRole = (to, from, next) => {
     }
 };
 
-export { guardsRoute, guardsLogin, checkRole };
+export { clearSession, guardsRoute, guardsLogin, checkRole };

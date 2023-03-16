@@ -1,67 +1,173 @@
 <template>
-    <div>
-        <div style="margin-bottom: 1em">
-            <SelectButton v-model="value1" :options="options" aria-labelledby="single" @change="e" />
-        </div>
-        <TreeTable :value="nodes" :expandedKeys="expandedKeys" :filters="filters1" filterMode="lenient">
+    <main>
+        <DataTable :value="flujos" :loading="cargandoTabla">
             <template #header>
-                Flujo de caja semanal :
-                <Dropdown
-                    v-model="selectedCity2"
-                    :options="cities"
-                    optionLabel="name"
-                    :editable="true"
-                    placeholder="Selecione una sociedad"
-                />
-                <div class="text-right">
-                    <div class="p-input-icon-left">
-                        <i class="pi pi-search"></i>
-                        <InputText v-model="filters1['global']" placeholder="Busqueda ..." size="50" />
-                    </div>
-                </div>
+                <h3>Flujo de caja semanal :</h3>
+                <Toolbar>
+                    <template #start>
+                        <div class="p-d-flex p-jc-center mr-2">
+                            <Dropdown
+                                class="p-mr-2"
+                                v-model="sociedadSeleccionada"
+                                :options="sociedades"
+                                optionLabel="name"
+                                :editable="true"
+                                :loading="cargandoSociedades"
+                                placeholder="Selecione una sociedad"
+                                @change="filtroSociedades(sociedadSeleccionada.value)"
+                            />
+                        </div>
+                        <div class="p-d-flex p-jc-center">
+                            <Dropdown
+                                class="p-mr-2"
+                                v-model="semanaSeleccionada"
+                                :options="semanas"
+                                :filter="true"
+                                optionLabel="name"
+                                :editable="true"
+                                :loading="cargandoSemanas"
+                                placeholder="Selecione un rango de fechas"
+                                @change="ObtenerFlujos(sociedadSeleccionada.value, semanaSeleccionada.value)"
+                            />
+                        </div>
+                    </template>
+                </Toolbar>
             </template>
-            <Column field="concepto" header="Concepto" headerStyle="width: 10%"></Column>
-            <Column
-                field="descripcion"
-                header="Descripcion"
-                headerStyle="w-auto  white-space-nowrap overflow-hidden text-overflow-ellipsis"
-                :expander="true"
-            ></Column>
-            <Column field="ejecucion" header="Ejecucion" headerStyle="width: 20%"></Column>
-            <Column field="esperado" header="Esperados" headerStyle="width: 20%"></Column>
-            <Column field="cumplimiento" header="Cumplimiento %" headerStyle="width: 10%"></Column>
-            <!-- <Column headerStyle="width: 10rem" headerClass="text-center" bodyClass="text-center">
-                <template #header>
-                    <Button type="button" icon="pi pi-download"></Button>
+            <template #empty><p class="text-center">Seleccione una sociedad.</p> </template>
+            <template #loading> <h3 class="text-white my-10">Cargando flujos, Por favor espere ...</h3> </template>
+            <Column field="concepto" header="Concepto">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ slotProps.data.concepto }}
+                    </span>
                 </template>
-                <template #body>
-                    <Button
-                        type="button"
-                        icon="pi pi-search"
-                        class="p-button-success"
-                        style="margin-right: 0.5em"
-                    ></Button>
-                    <Button type="button" icon="pi pi-pencil" class="p-button-warning"></Button>
+            </Column>
+            <Column field="descripcion" header="Descripción">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ slotProps.data.descripcion }}
+                    </span>
                 </template>
-            </Column> -->
+            </Column>
+            <Column field="ejecucion" header="Ejecución">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ $formatoMonedaCOP(slotProps.data.ejecucion) }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="esperado" header="Esperado">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ $formatoMonedaCOP(slotProps.data.esperado) }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="porcentaje" header="Cumplimiento">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ slotProps.data.porcentaje }}
+                    </span>
+                </template>
+            </Column>
             <template #footer>
-                <div style="text-align: center">
-                    <Button icon="pi pi-download" @click="imprimir" />
+                <div class="text-center p-d-flex p-jc-between">
+                    <Button label="Imprimir" icon="pi pi-print" class="p-button-success p-mr-2" @click="imprimir" />
                 </div>
             </template>
-        </TreeTable>
-    </div>
+        </DataTable>
+    </main>
 </template>
+
 <script setup>
-import { ref /* reactive */ } from 'vue';
-// import { useToast } from 'primevue/usetoast';
+import { ref, onMounted } from 'vue';
 import { obtenerTodo } from '@/service/clienteHttp';
 
-const expandedKeys = ref({});
-const filters1 = ref({});
-const value1 = ref('Off');
-const options = ref(['Off', 'On']);
-// const toast = useToast();
+const sociedadSeleccionada = ref(null);
+
+const semanaSeleccionada = ref(null);
+
+const sociedades = ref([]);
+
+const semanas = ref([]);
+
+const flujos = ref([]);
+
+const cargandoSociedades = ref(false);
+
+const cargandoSemanas = ref(false);
+
+const cargandoTabla = ref(false);
+
+onMounted(() => {
+    obtenerSociedades();
+});
+
+const claseTituloSubtitulo = (concepto) => {
+    if (concepto <= 2) return 'font-bold';
+    if (concepto > 2 && concepto <= 4) return 'ml-3 font-bold';
+    return 'text-xs ml-6';
+};
+
+const ObtenerFlujos = (sociedad, fecha) => {
+    cargandoTabla.value = true;
+    obtenerTodo(`/flujoCaja/obtener/${sociedad}/${fecha}`, 'json')
+        .then((res) => {
+            flujos.value = res.data;
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+        .finally(() => {
+            cargandoTabla.value = false;
+        });
+};
+
+const obtenerSemanas = (sociedad) => {
+    cargandoSemanas.value = true;
+    obtenerTodo(`/flujoCaja/semanas/${sociedad}`, 'json')
+        .then((res) => {
+            res.data.forEach((semana) => {
+                semanas.value.push({
+                    name: semana.fecha,
+                    value: semana.fecha
+                });
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+        .finally(() => {
+            cargandoSemanas.value = false;
+        });
+};
+
+const filtroSociedades = (sociedad) => {
+    if (semanas.value.length > 0) {
+        ObtenerFlujos(sociedad, semanaSeleccionada.value.name);
+    } else {
+        obtenerSemanas(sociedad);
+    }
+};
+
+const obtenerSociedades = () => {
+    cargandoSociedades.value = true;
+    obtenerTodo('/flujoCaja/sociedades', 'json')
+        .then((res) => {
+            res.data.forEach((element) => {
+                sociedades.value.push({
+                    name: element.asociacion,
+                    value: element.asociacion
+                });
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+        .finally(() => {
+            cargandoSociedades.value = false;
+        });
+};
 
 const imprimir = async () => {
     const res = await obtenerTodo('archivos/descargar', 'blob');
@@ -75,44 +181,7 @@ const imprimir = async () => {
     link.click();
 };
 
-const e = (e) => {
-    if (e.value === 'On') {
-        expandAll();
-    } else if (e.value === 'Off') {
-        collapseAll();
-    }
-};
-const expandAll = () => {
-    for (let node of nodes.value) {
-        expandNode(node);
-    }
-
-    expandedKeys.value = { ...expandedKeys.value };
-};
-
-const collapseAll = () => {
-    expandedKeys.value = {};
-};
-
-const expandNode = (node) => {
-    if (node.children && node.children.length) {
-        expandedKeys.value[node.key] = true;
-
-        for (let child of node.children) {
-            expandNode(child);
-        }
-    }
-};
-const selectedCity2 = ref(null);
-const cities = ref([
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-    { name: 'London', code: 'LDN' },
-    { name: 'Istanbul', code: 'IST' },
-    { name: 'Paris', code: 'PRS' }
-]);
-
-const nodes = ref([
+/* const nodes = ref([
     {
         key: '0',
         data: {
@@ -171,7 +240,7 @@ const nodes = ref([
                     concepto: 1,
                     descripcion: 'Egresos',
                     ejecucion: 0,
-                    esperado: 'Folder',
+                    esperado: 3004118053,
                     cumplimiento: 80
                 },
                 children: [
@@ -190,8 +259,8 @@ const nodes = ref([
                         data: {
                             concepto: 1,
                             descripcion: 'PAGO DE HONORARIOS',
-                            ejecucion: '10kb',
-                            esperado: 'Application',
+                            ejecucion: 3500000,
+                            esperado: 1004118053,
                             cumplimiento: 80
                         }
                     },
@@ -265,7 +334,7 @@ const nodes = ref([
         children: [
             {
                 key: '3-0',
-                data: { concepto: 1, descripcion: 'Ingresos', ejecucion: '25kb', esperado: 'Folder', cumplimiento: 80 },
+                data: { concepto: 1, descripcion: 'Ingresos', ejecucion: 2340000, esperado: '-', cumplimiento: 80 },
                 children: [
                     {
                         key: '3-0-0',
@@ -284,8 +353,8 @@ const nodes = ref([
                 data: {
                     concepto: 1,
                     descripcion: 'Egresos',
-                    ejecucion: '25kb',
-                    esperado: 'Folder',
+                    ejecucion: '-',
+                    esperado: 10418944,
                     cumplimiento: 80
                 },
                 children: [
@@ -304,8 +373,8 @@ const nodes = ref([
                         data: {
                             concepto: 1,
                             descripcion: 'PAGO DE COMISIONES',
-                            ejecucion: '10kb',
-                            esperado: 'Application',
+                            ejecucion: 41894,
+                            esperado: 10418944,
                             cumplimiento: 80
                         }
                     },
@@ -333,11 +402,9 @@ const nodes = ref([
             }
         ]
     }
-]);
+]); */
 </script>
+
 <style lang="scss" scoped>
-.p-rowgroup-footer td {
-    font-weight: 700;
-    background-color: var(--surface-d);
-}
+//
 </style>

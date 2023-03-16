@@ -30,6 +30,11 @@ const model = ref([
                         label: 'Mensuales',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/mensuales'
+                    },
+                    {
+                        label: 'Esperado Semanal',
+                        icon: 'pi pi-fw pi-file-excel',
+                        to: '/reportes/esperadoSemanal'
                     }
                 ]
             },
@@ -38,7 +43,7 @@ const model = ref([
     },
     {
         label: 'Envio de correos electronicos',
-        items: [{ label: 'Correos', icon: 'pi pi-fw pi-envelope', to: '/inicio/dashboard' }]
+        items: [{ label: 'Correos', icon: 'pi pi-fw pi-envelope', to: '/correos' }]
     }
 ]);
 </script>

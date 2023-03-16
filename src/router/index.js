@@ -54,6 +54,23 @@ const router = createRouter({
                     path: '/reportes/mensuales',
                     name: 'mensuales',
                     component: () => import('@/views/pages/planeacion/ReporteMensual.vue')
+                },
+                {
+                    path: '/reportes/esperadoSemanal',
+                    name: 'esperadosemanal',
+                    component: () => import('@/views/pages/planeacion/EsperadoSemanal.vue')
+                }
+            ]
+        },
+        {
+            path: '/correos',
+            component: AppLayout,
+            beforeEnter: [guardsRoute],
+            children: [
+                {
+                    path: '/correos',
+                    name: 'correos',
+                    component: () => import('@/views/pages/planeacion/Correos.vue')
                 }
             ]
         },

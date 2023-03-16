@@ -57,7 +57,7 @@ const crear = async (RUTA, DATA, CONTENT = null) => {
                 'Content-Type': CONTENT
             }
         });
-        return respuesta.statusText;
+        return respuesta;
     } catch (error) {
         return error;
     }

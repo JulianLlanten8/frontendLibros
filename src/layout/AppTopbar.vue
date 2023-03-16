@@ -15,15 +15,11 @@
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
             <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-calendar"></i>
-                <span>Calendar</span>
-            </button>
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
                 <i class="pi pi-user"></i>
                 <span>Profile</span>
             </button>
             <button @click="onSettingsClick()" class="p-link layout-topbar-button">
-                <i class="pi pi-cog"></i>
+                <i class="pi pi-fw pi-power-off"></i>
                 <span>Settings</span>
             </button>
         </div>
@@ -34,7 +30,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
-
+import { clearSession } from '@/router/auth-guard';
 const { layoutConfig, onMenuToggle, contextPath } = useLayout();
 
 const outsideClickListener = ref(null);
@@ -57,8 +53,9 @@ const onTopBarMenuButton = () => {
     topbarMenuActive.value = !topbarMenuActive.value;
 };
 const onSettingsClick = () => {
-    topbarMenuActive.value = false;
-    router.push('/documentation');
+    /* topbarMenuActive.value = false; */
+    clearSession();
+    router.push('/');
 };
 const topbarMenuClasses = computed(() => {
     return {
