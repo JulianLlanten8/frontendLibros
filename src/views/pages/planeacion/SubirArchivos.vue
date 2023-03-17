@@ -2,27 +2,60 @@
     <div class="grid">
         <Toast />
         <div class="col-12">
-            <div class="card">
-                <h5>Espacio para subir archivos</h5>
-                <Dropdown
-                    v-model="sociedad"
-                    :options="sociedades"
-                    :loading="cargandoSociedades"
-                    optionValue="nombre"
-                    optionLabel="nombre"
-                    placeholder="Seleccione una sociedad"
-                    class="my-3 w-full"
-                    @change="unblockBlock"
-                    :showClear="true"
-                />
-                <ProgressBar mode="indeterminate" style="height: 0.5em" v-if="cargando" />
-                <BlockUI :blocked="bloqueado">
+            <Card>
+                <template #title>
+                    <h5>Subir archivos</h5>
+                </template>
+                <template #content>
+                    <div class="flex flex-column md:flex-row gap-3">
+                        <div class="p-inputgroup flex-1">
+                            <Dropdown
+                                v-model="tipo"
+                                :options="tiposArchivos"
+                                optionLabel="nombre"
+                                placeholder="Selecione el tipo de archivo"
+                                class="my-3 w-full"
+                                @change="validarTipoArchivo()"
+                                :showClear="true"
+                            />
+                        </div>
+                        <div class="p-inputgroup flex-1">
+                            <Dropdown
+                                v-model="sociedad"
+                                :options="sociedades"
+                                :loading="cargandoSociedades"
+                                optionValue="nombre"
+                                optionLabel="nombre"
+                                placeholder="Seleccione una sociedad"
+                                class="my-3 w-full"
+                                @change="obtenerSemanas(sociedad)"
+                                :showClear="true"
+                            />
+                        </div>
+                        <div class="p-inputgroup flex-1">
+                            <Dropdown
+                                v-if="visible"
+                                v-model="semana"
+                                :options="semanas"
+                                optionLabel="semana"
+                                optionValue="semana"
+                                placeholder="Seleccione una semana"
+                                class="my-3 w-full"
+                                :showClear="true"
+                                @change="validarBloqueo()"
+                            />
+                        </div>
+                    </div>
+                </template>
+                <template #footer>
+                    <ProgressBar mode="indeterminate" style="height: 0.5em" v-if="cargando" />
                     <FileUpload
                         name="Excel"
                         :customUpload="true"
                         @uploader="subirArchivo($event)"
                         @upload="onUpload"
                         :multiple="true"
+                        :disabled="bloqueado"
                         :accept="'application/vnd.ms-excel, .csv, .xls,.xlsx'"
                         :maxFileSize="1000000"
                         invalidFileSizeMessage="El tamaño del archivo es demasiado grande"
@@ -31,8 +64,8 @@
                         cancelLabel="Cancelar"
                         invalidFileTypeMessage="El tipo de archivo no es válido"
                     />
-                </BlockUI>
-            </div>
+                </template>
+            </Card>
         </div>
     </div>
 </template>
@@ -46,14 +79,24 @@ onMounted(async () => {
     obtenerSociedades();
 });
 
-const toast = useToast();
-const unblockBlock = () => {
-    if (sociedad.value) {
-        bloqueado.value = false;
-    } else {
-        bloqueado.value = true;
-    }
+const tipo = ref('');
+const tiposArchivos = ref([
+    { nombre: 'Esperado' },
+    { nombre: 'Ejecutado - Egresos' },
+    { nombre: 'Ejecutado - Ingresos' }
+]);
+const visible = ref(false);
+
+const validarTipoArchivo = () => {
+    validarBloqueo();
+    tipo.value.nombre != 'Esperado' ? (visible.value = true) : (visible.value = false);
 };
+
+const semana = ref('');
+const semanas = ref([]);
+
+const toast = useToast();
+
 const bloqueado = ref(true);
 
 const sociedad = ref({
@@ -62,7 +105,38 @@ const sociedad = ref({
     nombre: ''
 });
 
+const validarBloqueo = () => {
+    if (tipo.value.nombre == 'Esperado' && sociedad.value.nombre != '') {
+        bloqueado.value = false;
+    } else if (tipo.value.nombre != 'Esperado' && sociedad.value.nombre != '' && semana.value != '') {
+        bloqueado.value = false;
+    } else {
+        bloqueado.value = true;
+    }
+};
+
 const cargandoSociedades = ref(false);
+const obtenerSemanas = async (sociedad) => {
+    cargandoSociedades.value = true;
+    semana.value = '';
+    validarBloqueo();
+
+    await obtenerTodo(`/flujoCaja/semanas/${sociedad}`)
+        .then((res) => {
+            semanas.value = res.data;
+        })
+        .catch((err) => {
+            toast.add({
+                severity: 'danger',
+                summary: 'Error',
+                detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
+                life: 5000
+            });
+        })
+        .finally(() => {
+            cargandoSociedades.value = false;
+        });
+};
 
 const obtenerSociedades = async () => {
     cargandoSociedades.value = true;
@@ -91,12 +165,34 @@ const onUpload = () => {
 const cargando = ref(false);
 const subirArchivo = async (event) => {
     let archivo = event.files[0];
+    console.log(event);
     cargando.value = true;
-    const subidaArchivo = await crear(
-        '/archivos/crear/',
-        { archivo: archivo, asociacion: sociedad.value.nombre },
-        'multipart/form-data'
-    );
+    let subidaArchivo = null;
+    switch (tipo.value.nombre) {
+        case 'Esperado':
+            subidaArchivo = await crear(
+                '/esperado/subir',
+                { archivo: archivo, sociedad: sociedad.value },
+                'multipart/form-data'
+            );
+            break;
+        case 'Ejecutado - Egresos':
+            subidaArchivo = await crear(
+                '/esperado/subirEgresos',
+                { archivo: archivo, sociedad: sociedad.value, semana: semana.value },
+                'multipart/form-data'
+            );
+            break;
+        case 'Ejecutado - Ingresos':
+            subidaArchivo = await crear(
+                '/esperado/subirIngresos',
+                { archivo: archivo, semana: semana.value },
+                'multipart/form-data'
+            );
+            break;
+        default:
+            break;
+    }
 
     if (subidaArchivo.status == 200) {
         toast.add({ severity: 'Success', summary: 'Success', detail: 'Archivo subido correctamente', life: 3000 });

@@ -22,7 +22,7 @@ const model = ref([
                 icon: 'pi pi-fw pi-folder',
                 items: [
                     {
-                        label: 'Semanales',
+                        label: 'FC Semanal',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/semanales'
                     },
@@ -30,15 +30,15 @@ const model = ref([
                         label: 'Mensuales',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/mensuales'
-                    },
-                    {
-                        label: 'Esperado Semanal',
-                        icon: 'pi pi-fw pi-file-excel',
-                        to: '/reportes/esperadoSemanal'
                     }
                 ]
             },
-            { label: 'Subida de archivos', icon: 'pi pi-fw pi-file-import', to: '/inicio/subirArchivos' }
+            {
+                label: 'Ingresar saldos',
+                icon: 'pi pi-fw pi-wallet',
+                to: '/reportes/esperadoSemanal'
+            },
+            { label: 'Subir archivos', icon: 'pi pi-fw pi-file-import', to: '/inicio/subirArchivos' }
         ]
     },
     {

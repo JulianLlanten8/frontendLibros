@@ -45,6 +45,7 @@ const obtenerTodo = async (RUTA, Type = null) => {
  */
 const crear = async (RUTA, DATA, CONTENT = null) => {
     try {
+        console.log(DATA);
         let user = sessionStorage.getItem('USER');
 
         DATA.id_user_log = JSON.parse(user).id;

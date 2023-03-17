@@ -17,7 +17,7 @@
                     style="border-radius: 53px"
                 >
                     <div class="text-center mb-5">
-                        <div class="text-900 text-3xl font-medium mb-3">Planeacion</div>
+                        <div class="text-900 text-3xl font-medium mb-3">Planeación</div>
                         <span class="text-600 font-medium">Inicia sesión para continuar</span>
                     </div>
                     <div class="col-12">
@@ -33,13 +33,13 @@
                                 class="block text-900 text-xl font-medium mb-2"
                                 :class="{ 'p-error': (v$.email.$invalid && submitted) || error }"
                             >
-                                Correo Electronico
+                                Correo electrónico
                                 <span class="text-red-500">*</span>
                             </label>
                             <InputText
                                 id="email"
                                 type="text"
-                                placeholder="Correo electronico"
+                                placeholder="Correo electrónico"
                                 class="w-full md:w-30rem"
                                 :class="{ 'p-invalid': (v$.email.$invalid && submitted) || error }"
                                 style="padding: 1rem"
@@ -71,8 +71,8 @@
                             id="password"
                             v-model="v$.password.$model"
                             placeholder="Contraseña"
-                            :toggleMask="true"
                             class="w-full"
+                            :feedback="false"
                             :class="{ 'p-invalid': (v$.password.$invalid && submitted) || error }"
                             inputClass="w-full"
                             inputStyle="padding:1rem"
@@ -91,12 +91,12 @@
                             class="font-medium no-underline ml-2 text-right cursor-pointer"
                             @click="router.push('/olvido-contrasena')"
                             style="color: var(--primary-color)"
-                            >Olvido su Contraseña?
+                            >Olvido su contraseña?
                         </a>
                     </div>
 
                     <Button
-                        label="Iniciar Sesión"
+                        label="Iniciar sesión"
                         class="w-full p-3 text-xl"
                         :class="{ 'p-button-info': !v$.$invalid }"
                         @click="iniciarSesion(!v$.$invalid)"
@@ -163,7 +163,7 @@ const rules = {
 const v$ = useVuelidate(rules, login);
 
 const logoUrl = computed(() => {
-    return `${contextPath}layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+    return `${contextPath}layout/images/LOGOUNICO.webp`;
 });
 </script>
 

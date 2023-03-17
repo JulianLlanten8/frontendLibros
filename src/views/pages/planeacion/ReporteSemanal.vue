@@ -10,24 +10,24 @@
                                 class="p-mr-2"
                                 v-model="sociedadSeleccionada"
                                 :options="sociedades"
-                                optionLabel="name"
+                                optionLabel="nombre"
+                                optionValue="nombre"
                                 :editable="true"
                                 :loading="cargandoSociedades"
                                 placeholder="Selecione una sociedad"
-                                @change="filtroSociedades(sociedadSeleccionada.value)"
+                                @change="filtroSociedades(sociedadSeleccionada)"
                             />
                         </div>
                         <div class="p-d-flex p-jc-center">
                             <Dropdown
-                                class="p-mr-2"
-                                v-model="semanaSeleccionada"
+                                v-model="semana"
                                 :options="semanas"
-                                :filter="true"
-                                optionLabel="name"
-                                :editable="true"
-                                :loading="cargandoSemanas"
-                                placeholder="Selecione un rango de fechas"
-                                @change="ObtenerFlujos(sociedadSeleccionada.value, semanaSeleccionada.value)"
+                                optionLabel="semana"
+                                optionValue="semana"
+                                placeholder="Seleccione una semana"
+                                class="my-3 w-full"
+                                :showClear="true"
+                                @change="ObtenerFlujos(sociedadSeleccionada, semana)"
                             />
                         </div>
                     </template>
@@ -49,14 +49,14 @@
                     </span>
                 </template>
             </Column>
-            <Column field="ejecucion" header="Ejecución">
+            <Column field="ejecucion" header="Ejecución" class="text-right">
                 <template #body="slotProps">
                     <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
-                        {{ $formatoMonedaCOP(slotProps.data.ejecucion) }}
+                        {{ $formatoMonedaCOP(slotProps.data.ejecutado * -1) }}
                     </span>
                 </template>
             </Column>
-            <Column field="esperado" header="Esperado">
+            <Column field="esperado" header="Esperado" class="text-right">
                 <template #body="slotProps">
                     <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
                         {{ $formatoMonedaCOP(slotProps.data.esperado) }}
@@ -66,7 +66,11 @@
             <Column field="porcentaje" header="Cumplimiento">
                 <template #body="slotProps">
                     <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
-                        {{ slotProps.data.porcentaje }}
+                        {{
+                            slotProps.data.esperado == 0
+                                ? 0
+                                : Math.round(slotProps.data.ejecutado / slotProps.data.esperado) * 100
+                        }}%
                     </span>
                 </template>
             </Column>
@@ -81,11 +85,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { obtenerTodo } from '@/service/clienteHttp';
+import { obtenerTodo, crear } from '@/service/clienteHttp';
 
 const sociedadSeleccionada = ref(null);
 
-const semanaSeleccionada = ref(null);
+const semana = ref(null);
 
 const sociedades = ref([]);
 
@@ -104,47 +108,54 @@ onMounted(() => {
 });
 
 const claseTituloSubtitulo = (concepto) => {
-    if (concepto <= 2) return 'font-bold';
-    if (concepto > 2 && concepto <= 4) return 'ml-3 font-bold';
-    return 'text-xs ml-6';
+    if (concepto <= 2) {
+        return 'font-bold';
+    } else {
+        return 'ml-3';
+    }
 };
 
 const ObtenerFlujos = (sociedad, fecha) => {
     cargandoTabla.value = true;
-    obtenerTodo(`/flujoCaja/obtener/${sociedad}/${fecha}`, 'json')
+    crear('esperado/esperadosemanal', { sociedad: sociedad, fecha: fecha }, 'application/json')
         .then((res) => {
-            flujos.value = res.data;
+            console.log(res);
+            flujos.value = res.data.data;
         })
         .catch((err) => {
             console.log(err);
+            if (flujos.value) {
+                flujos.value = [];
+            }
         })
         .finally(() => {
             cargandoTabla.value = false;
         });
 };
 
-const obtenerSemanas = (sociedad) => {
-    cargandoSemanas.value = true;
-    obtenerTodo(`/flujoCaja/semanas/${sociedad}`, 'json')
+const obtenerSemanas = async (sociedad) => {
+    cargandoSociedades.value = true;
+    await obtenerTodo(`/flujoCaja/semanas/${sociedad}`)
         .then((res) => {
-            res.data.forEach((semana) => {
-                semanas.value.push({
-                    name: semana.fecha,
-                    value: semana.fecha
-                });
-            });
+            semanas.value = res.data;
         })
         .catch((err) => {
             console.log(err);
+            /* toast.add({
+                severity: 'danger',
+                summary: 'Error',
+                detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
+                life: 5000
+            }); */
         })
         .finally(() => {
-            cargandoSemanas.value = false;
+            cargandoSociedades.value = false;
         });
 };
 
 const filtroSociedades = (sociedad) => {
     if (semanas.value.length > 0) {
-        ObtenerFlujos(sociedad, semanaSeleccionada.value.name);
+        ObtenerFlujos(sociedadSeleccionada.value, semana.value.name);
     } else {
         obtenerSemanas(sociedad);
     }
@@ -152,14 +163,9 @@ const filtroSociedades = (sociedad) => {
 
 const obtenerSociedades = () => {
     cargandoSociedades.value = true;
-    obtenerTodo('/flujoCaja/sociedades', 'json')
+    obtenerTodo('sociedad/obtenerTodo')
         .then((res) => {
-            res.data.forEach((element) => {
-                sociedades.value.push({
-                    name: element.asociacion,
-                    value: element.asociacion
-                });
-            });
+            sociedades.value = res.data;
         })
         .catch((err) => {
             console.log(err);
