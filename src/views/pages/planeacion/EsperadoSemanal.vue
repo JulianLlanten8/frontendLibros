@@ -1,5 +1,6 @@
 <template>
     <div class="grid">
+        <Toast />
         <div class="col-6">
             <Card>
                 <template #title>
@@ -123,21 +124,159 @@
                 </template>
             </Card>
         </div>
+        <div class="col-6">
+            <Card>
+                <template #title>
+                    <h5>Ingresar saldo anual</h5>
+                </template>
+
+                <template #content>
+                    <div class="p-fluid col-12">
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">SEMANA INICIAL</label>
+                            <div class="col-12 md:col-7">
+                                <Dropdown
+                                    v-model="saldoAnual.semana"
+                                    :options="semanas"
+                                    optionLabel="semana"
+                                    optionValue="semana"
+                                    placeholder="Seleccione una semana"
+                                    class="my-3 w-full"
+                                    :showClear="true"
+                                    :disabled="true"
+                                    @change="validarSemanaChange()"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">CENTROS COMERCIALES DEL SUR SAS</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.sur"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">CENTROS COMERCIALES DEL CAFÉ SAS</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.cafe"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O PLATAFORMA</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.plataforma"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O BARRANQUILLA</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.barranquilla"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O YUMBO</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.paoyumbo"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O VILLAVICENCIO</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.paovillavicencio"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O NEIVA</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.paoneiva"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O CALI</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.paocali"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </template>
+                <template #footer>
+                    <Button
+                        label="Guardar"
+                        :disabled="validarSemana"
+                        class="p-button-success text-center"
+                        @click="guardarSaldoAnual"
+                    />
+                </template>
+            </Card>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from 'vue';
 import { crear, obtenerTodo } from '@/service/clienteHttp';
+import { useToast } from 'primevue/usetoast';
 onMounted(() => {
     obtenerSemanas('CENTROS COMERCIALES DEL CAFÉ SAS');
 });
 
+const toast = useToast();
 const semanas = ref(null);
 const validarSemana = ref(true);
 const cargandoSociedades = ref(null);
 
 const saldos = reactive({
+    semana: null,
+    sur: 0,
+    cafe: 0,
+    plataforma: 0,
+    barranquilla: 0,
+    paoyumbo: 0,
+    paovillavicencio: 0,
+    paoneiva: 0,
+    paocali: 0
+});
+
+const saldoAnual = reactive({
     semana: null,
     sur: 0,
     cafe: 0,
@@ -181,6 +320,28 @@ const guardarSaldos = () => {
     crear('esperado/saldos_bancarios', saldos, 'application/json')
         .then((res) => {
             console.log(res);
+            toast.add({
+                severity: 'success',
+                summary: 'Exito',
+                detail: 'Saldos guardados correctamente',
+                life: 5000
+            });
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+const guardarSaldoAnual = () => {
+    crear('esperado/saldo_anual', saldoAnual, 'application/json')
+        .then((res) => {
+            console.log(res);
+            toast.add({
+                severity: 'success',
+                summary: 'Exito',
+                detail: 'Saldos guardados correctamente',
+                life: 5000
+            });
         })
         .catch((err) => {
             console.log(err);

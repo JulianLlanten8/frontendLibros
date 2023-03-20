@@ -22,11 +22,13 @@
                             <Dropdown
                                 v-model="semana"
                                 :options="semanas"
+                                :loading="cargandoSemanas"
+                                emptyMessage="No hay semanas disponibles"
                                 optionLabel="semana"
                                 optionValue="semana"
                                 placeholder="Seleccione una semana"
                                 class="my-3 w-full"
-                                :showClear="true"
+                                showClear="true"
                                 @change="ObtenerFlujos(sociedadSeleccionada, semana)"
                             />
                         </div>
@@ -49,10 +51,10 @@
                     </span>
                 </template>
             </Column>
-            <Column field="ejecucion" header="Ejecución" class="text-right">
+            <Column field="ejecucion" header="Ejecución" class="text-right" headerStyle="text-right">
                 <template #body="slotProps">
                     <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
-                        {{ $formatoMonedaCOP(slotProps.data.ejecutado * -1) }}
+                        {{ $formatoMonedaCOP(slotProps.data.ejecutado) }}
                     </span>
                 </template>
             </Column>
@@ -69,7 +71,7 @@
                         {{
                             slotProps.data.esperado == 0
                                 ? 0
-                                : Math.round(slotProps.data.ejecutado / slotProps.data.esperado) * 100
+                                : Math.round((slotProps.data.ejecutado / slotProps.data.esperado) * 100)
                         }}%
                     </span>
                 </template>
@@ -134,7 +136,7 @@ const ObtenerFlujos = (sociedad, fecha) => {
 };
 
 const obtenerSemanas = async (sociedad) => {
-    cargandoSociedades.value = true;
+    cargandoSemanas.value = true;
     await obtenerTodo(`/flujoCaja/semanas/${sociedad}`)
         .then((res) => {
             semanas.value = res.data;
@@ -149,7 +151,7 @@ const obtenerSemanas = async (sociedad) => {
             }); */
         })
         .finally(() => {
-            cargandoSociedades.value = false;
+            cargandoSemanas.value = false;
         });
 };
 
