@@ -14,11 +14,11 @@ import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([
     {
-        label: 'Integracion de datos',
+        label: 'Vista de datos',
         items: [
-            { label: 'Dashboard', icon: 'pi pi-fw pi-id-card', to: '/inicio/dashboard' },
+            /* { label: 'Dashboard', icon: 'pi pi-fw pi-id-card', to: '/inicio/dashboard' }, */
             {
-                label: 'Reportes',
+                label: 'Flujos caja',
                 icon: 'pi pi-fw pi-folder',
                 items: [
                     {
@@ -27,24 +27,38 @@ const model = ref([
                         to: '/reportes/semanales'
                     },
                     {
-                        label: 'Mensuales',
+                        label: 'FC Semanal Proyectado',
+                        icon: 'pi pi-fw pi-file-excel',
+                        to: '/reportes/esperado-semanal-proyectado'
+                    },
+                    {
+                        label: 'FC Mensual',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/mensuales'
                     }
                 ]
-            },
-            {
-                label: 'Ingresar saldos',
-                icon: 'pi pi-fw pi-wallet',
-                to: '/reportes/esperadoSemanal'
-            },
-            { label: 'Subir archivos', icon: 'pi pi-fw pi-file-import', to: '/inicio/subirArchivos' }
+            }
         ]
     },
     {
+        label: 'Integracion de datos',
+        items: [
+            {
+                label: 'Ingresar saldos',
+                icon: 'pi pi-fw pi-wallet',
+                to: '/inicio/EsperadoSemanal'
+            },
+            {
+                label: 'Subir archivos',
+                icon: 'pi pi-fw pi-file-import',
+                to: '/inicio/subirArchivos'
+            }
+        ]
+    } /* ,
+    {
         label: 'Envio de correos electronicos',
         items: [{ label: 'Correos', icon: 'pi pi-fw pi-envelope', to: '/correos' }]
-    }
+    } */
 ]);
 </script>
 

@@ -1,7 +1,7 @@
 <template>
-    <div class="grid">
+    <main class="grid">
         <Toast />
-        <div class="col-6">
+        <article class="col-6">
             <Card>
                 <template #title>
                     <h5>Ingresar saldos bancarios</h5>
@@ -47,12 +47,14 @@
                             </div>
                         </div>
                         <div class="field grid">
-                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O PLATAFORMA</label>
+                            <label class="col-12 mb-2 md:col-5" for="username">
+                                SERVICIOS ESTRATEGICOS COMPARTIDOS SAS
+                            </label>
                             <div class="col-12 md:col-7">
                                 <InputNumber
                                     :disabled="validarSemana"
                                     id="username"
-                                    v-model="saldos.plataforma"
+                                    v-model="saldos.sec"
                                     aria-describedby="username-help"
                                 />
                             </div>
@@ -64,6 +66,17 @@
                                     :disabled="validarSemana"
                                     id="username"
                                     v-model="saldos.barranquilla"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O CALI</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldos.paocali"
                                     aria-describedby="username-help"
                                 />
                             </div>
@@ -91,23 +104,23 @@
                             </div>
                         </div>
                         <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O PLATAFORMA</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldos.plataforma"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
                             <label class="col-12 mb-2 md:col-5" for="username">P.A.O NEIVA</label>
                             <div class="col-12 md:col-7">
                                 <InputNumber
                                     :disabled="validarSemana"
                                     id="username"
                                     v-model="saldos.paoneiva"
-                                    aria-describedby="username-help"
-                                />
-                            </div>
-                        </div>
-                        <div class="field grid">
-                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O CALI</label>
-                            <div class="col-12 md:col-7">
-                                <InputNumber
-                                    :disabled="validarSemana"
-                                    id="username"
-                                    v-model="saldos.paocali"
                                     aria-describedby="username-help"
                                 />
                             </div>
@@ -123,8 +136,8 @@
                     />
                 </template>
             </Card>
-        </div>
-        <div class="col-6">
+        </article>
+        <article class="col-6">
             <Card>
                 <template #title>
                     <h5>Ingresar saldo anual</h5>
@@ -171,12 +184,14 @@
                             </div>
                         </div>
                         <div class="field grid">
-                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O PLATAFORMA</label>
+                            <label class="col-12 mb-2 md:col-5" for="username">
+                                SERVICIOS ESTRATEGICOS COMPARTIDOS SAS
+                            </label>
                             <div class="col-12 md:col-7">
                                 <InputNumber
                                     :disabled="validarSemana"
                                     id="username"
-                                    v-model="saldoAnual.plataforma"
+                                    v-model="saldoAnual.sec"
                                     aria-describedby="username-help"
                                 />
                             </div>
@@ -188,6 +203,17 @@
                                     :disabled="validarSemana"
                                     id="username"
                                     v-model="saldoAnual.barranquilla"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O CALI</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.paocali"
                                     aria-describedby="username-help"
                                 />
                             </div>
@@ -214,6 +240,18 @@
                                 />
                             </div>
                         </div>
+
+                        <div class="field grid">
+                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O PLATAFORMA</label>
+                            <div class="col-12 md:col-7">
+                                <InputNumber
+                                    :disabled="validarSemana"
+                                    id="username"
+                                    v-model="saldoAnual.plataforma"
+                                    aria-describedby="username-help"
+                                />
+                            </div>
+                        </div>
                         <div class="field grid">
                             <label class="col-12 mb-2 md:col-5" for="username">P.A.O NEIVA</label>
                             <div class="col-12 md:col-7">
@@ -221,17 +259,6 @@
                                     :disabled="validarSemana"
                                     id="username"
                                     v-model="saldoAnual.paoneiva"
-                                    aria-describedby="username-help"
-                                />
-                            </div>
-                        </div>
-                        <div class="field grid">
-                            <label class="col-12 mb-2 md:col-5" for="username">P.A.O CALI</label>
-                            <div class="col-12 md:col-7">
-                                <InputNumber
-                                    :disabled="validarSemana"
-                                    id="username"
-                                    v-model="saldoAnual.paocali"
                                     aria-describedby="username-help"
                                 />
                             </div>
@@ -247,8 +274,8 @@
                     />
                 </template>
             </Card>
-        </div>
-    </div>
+        </article>
+    </main>
 </template>
 
 <script setup>
@@ -268,6 +295,7 @@ const saldos = reactive({
     semana: null,
     sur: 0,
     cafe: 0,
+    sec: 0,
     plataforma: 0,
     barranquilla: 0,
     paoyumbo: 0,
@@ -280,6 +308,7 @@ const saldoAnual = reactive({
     semana: null,
     sur: 0,
     cafe: 0,
+    sec: 0,
     plataforma: 0,
     barranquilla: 0,
     paoyumbo: 0,
@@ -295,13 +324,12 @@ const obtenerSemanas = async (sociedad) => {
             semanas.value = res.data;
         })
         .catch((err) => {
-            console.log(err);
-            /* toast.add({
+            toast.add({
                 severity: 'danger',
                 summary: 'Error',
                 detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
                 life: 5000
-            }); */
+            });
         })
         .finally(() => {
             cargandoSociedades.value = false;
@@ -328,7 +356,12 @@ const guardarSaldos = () => {
             });
         })
         .catch((err) => {
-            console.log(err);
+            toast.add({
+                severity: 'danger',
+                summary: 'Error',
+                detail: `Ups! algo salio mal al guardar los saldos error: ${err}`,
+                closable: true
+            });
         });
 };
 

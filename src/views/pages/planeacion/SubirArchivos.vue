@@ -128,8 +128,8 @@ const obtenerSemanas = async (sociedad) => {
         .catch((err) => {
             toast.add({
                 severity: 'danger',
-                summary: 'Error',
-                detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
+                summary: 'Ups! algo salio mal al obtener las sociedades error:',
+                detail: `${err}`,
                 life: 5000
             });
         })
@@ -163,11 +163,10 @@ const onUpload = () => {
 };
 
 const cargando = ref(false);
+let subidaArchivo = null;
 const subirArchivo = async (event) => {
     let archivo = event.files[0];
-    console.log(event);
     cargando.value = true;
-    let subidaArchivo = null;
     switch (tipo.value.nombre) {
         case 'Esperado':
             subidaArchivo = await crear(
@@ -193,16 +192,20 @@ const subirArchivo = async (event) => {
         default:
             break;
     }
-
-    if (subidaArchivo.status == 200) {
-        toast.add({ severity: 'Success', summary: 'Success', detail: 'Archivo subido correctamente', life: 3000 });
+    if (subidaArchivo.status === 201) {
+        toast.add({
+            severity: 'success',
+            summary: 'Archivo subido correctamente',
+            detail: `${subidaArchivo.data.message}`,
+            closable: true
+        });
         cargando.value = false;
     } else {
         toast.add({
-            severity: 'Error',
-            summary: 'Error',
-            detail: 'Ups! algo salio mal al subir el archivo',
-            life: 3000
+            severity: 'warn',
+            summary: 'Ups! algo salio mal al subir el archivo',
+            detail: `${subidaArchivo.data.error}`,
+            closable: true
         });
         cargando.value = false;
     }

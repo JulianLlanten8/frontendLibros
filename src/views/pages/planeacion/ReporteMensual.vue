@@ -1,323 +1,257 @@
 <template>
-    <div>
-        <Toast />
-        <div class="card">
-            <h5>FC SEMANAL</h5>
-            <DataTable
-                :value="ejecucion"
-                rowGroupMode="subheader"
-                groupRowsBy="representative.name"
-                sortMode="single"
-                sortField="representative.name"
-                :sortOrder="1"
-                responsiveLayout="scroll"
-                :expandableRowGroups="true"
-                v-model:expandedRowGroups="expandedRowGroups"
-                @rowgroupExpand="onRowGroupExpand"
-                @rowgroupCollapse="onRowGroupCollapse"
-            >
-                <ColumnGroup type="header">
-                    <Row>
-                        <Column :rowspan="2">
-                            <template #header>
-                                <div class="p-d-flex p-jc-center">
-                                    <div class="p-mr-2">Fecha</div>
-                                    <Calendar
-                                        inputId="range"
-                                        v-model="rango"
-                                        :max-date="diaMaximo.max"
-                                        :min-date="diaMaximo.min"
-                                        selectionMode="range"
-                                        :manualInput="true"
-                                        :disabledDays="[0, 6]"
-                                    />
-                                </div>
-                            </template>
-                        </Column>
-                        <Column header="Semana" :colspan="6" />
-                    </Row>
-                    <Row>
-                        <Column header="Semana (01-31) Dic" :colspan="6" />
-                    </Row>
-                    <Row>
-                        <Column field="representative.concepto" header="Concepto" />
-                        <Column field="representative.name" header="Nombre" :sortable="true" />
-                        <Column field="nombre" header="Descripcion" :sortable="true" />
-                        <Column field="ejecucion" header="Ejecucion" :sortable="true" />
-                        <Column field="esperado" header="Esperado" :sortable="true" />
-                        <Column field="porcentaje" header="%" :sortable="true" />
-                    </Row>
-                </ColumnGroup>
-                <Column field="representative.concepto" header="Concepto"></Column>
-                <Column field="representative.name" header="Representative"></Column>
-                <Column field="nombre" header="DESCRIPCION"></Column>
-                <Column field="ejecucion" header="EJECUCION"></Column>
-                <Column field="esperado" header="ESPERADO"></Column>
-                <Column field="porcentaje" header="%">
-                    <template #body="slotProps">
-                        <Tag :severity="`${escalaColor(slotProps.data.porcentaje)}`">
-                            {{ slotProps.data.porcentaje }} %
-                        </Tag>
+    <main>
+        <DataTable id="tablaFlujos" :value="flujoMensual" :loading="cargandoTabla">
+            <template #header>
+                <h3>Flujo de caja mensual</h3>
+                <Toolbar>
+                    <template #start>
+                        <div class="p-d-flex p-jc-center mr-2">
+                            <Dropdown
+                                class="p-mr-2"
+                                v-model="sociedadSeleccionada"
+                                :options="sociedades"
+                                optionLabel="nombre"
+                                optionValue="nombre"
+                                :editable="true"
+                                :loading="cargandoSociedades"
+                                placeholder="Selecione una sociedad"
+                                @change="filtroSociedades(sociedadSeleccionada)"
+                            />
+                        </div>
+                        <div class="p-d-flex p-jc-center">
+                            <Dropdown
+                                v-model="semana"
+                                :options="semanas"
+                                :loading="cargandoSemanas"
+                                emptyMessage="No hay semanas disponibles"
+                                optionLabel="semana"
+                                optionValue="semana"
+                                placeholder="Seleccione una semana"
+                                class="my-3 w-full"
+                                :showClear="true"
+                                @change="ObtenerFlujos(sociedadSeleccionada, semana)"
+                            />
+                        </div>
                     </template>
-                </Column>
-                <template #groupheader="slotProps">
-                    <img
-                        :alt="slotProps.data.representative.name"
-                        src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png"
-                        width="32"
-                        style="vertical-align: middle"
+                    <!-- <template #end>
+                    </template> -->
+                </Toolbar>
+                <div class="flex justify-content-between flex-wrap">
+                    <cardEstadistica v-if="flujoNeto.concepto" :estadistica="flujoNeto" />
+                    <cardEstadistica v-if="saldoFinal.concepto" :estadistica="saldoFinal" />
+                    <cardEstadistica v-if="saldoBancarios.concepto" :estadistica="saldoBancarios" />
+                </div>
+            </template>
+            <template #empty><p class="text-center">Seleccione una sociedad.</p> </template>
+            <template #loading> <h3 class="text-white my-10">Cargando flujos, Por favor espere ...</h3> </template>
+            <Column field="concepto" header="Concepto">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ slotProps.data.concepto }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="descripcion" header="Descripción">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ slotProps.data.descripcion }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="ejecucion" header="Ejecución" class="text-right" headerStyle="text-right">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ $formatoMonedaCOP(slotProps.data.ejecutado) }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="esperado" header="Esperado" class="text-right">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{ $formatoMonedaCOP(slotProps.data.esperado) }}
+                    </span>
+                </template>
+            </Column>
+            <Column field="porcentaje" header="Cumplimiento">
+                <template #body="slotProps">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                        {{
+                            slotProps.data.esperado == 0 ||
+                            slotProps.data.ejecutado == 0 ||
+                            slotProps.data.esperado == '0' ||
+                            slotProps.data.ejecutado == '0'
+                                ? 0
+                                : Math.round((slotProps.data.ejecutado / slotProps.data.esperado) * 100)
+                        }}%
+                    </span>
+                </template>
+            </Column>
+            <template #footer>
+                <div class="text-center p-d-flex p-jc-between">
+                    <Button
+                        v-if="flujoMensual.length > 0"
+                        label="Imprimir"
+                        icon="pi pi-print"
+                        class="p-button-success p-mr-2"
+                        @click="imprimir(flujoMensual)"
                     />
-                    <span class="image-text">{{ slotProps.data.representative.name }}</span>
-                </template>
-                <template #groupfooter="slotProps">
-                    <td colspan="2">Total</td>
-                    <td>
-                        {{ $formatoMonedaCOP(calcularTotalEjecucion(slotProps.data.representative.name)) }}
-                    </td>
-                    <td>
-                        {{ $formatoMonedaCOP(calcularTotalEsperado(slotProps.data.representative.name)) }}
-                    </td>
-                    <td>
-                        <Tag :severity="`${escalaColor(calcularPorcentaje(slotProps.data.representative.name))}`">
-                            {{ calcularPorcentaje(slotProps.data.representative.name) }} %
-                        </Tag>
-                    </td>
-                </template>
-            </DataTable>
-        </div>
-    </div>
+                </div>
+            </template>
+        </DataTable>
+    </main>
 </template>
+
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, onMounted } from 'vue';
+import { obtenerTodo, crear } from '@/service/clienteHttp';
 import { useToast } from 'primevue/usetoast';
-const expandedRowGroups = ref();
-const rango = ref();
-const diaMaximo = reactive({
-    min: reactive(new Date(2020, 11, 1)),
-    max: reactive(new Date(new Date() + 1))
-});
+import * as XLSX from 'xlsx/xlsx.mjs';
+
+import cardEstadistica from '@/components/cardEstadisticaSemanal.vue';
+
 const toast = useToast();
-const calcularPorcentaje = (name) => {
-    let porcentaje = 0;
-    let promedio = 0;
+const sociedadSeleccionada = ref(null);
 
-    if (ejecucion.value) {
-        for (let customer of ejecucion.value) {
-            if (customer.representative.name === name) {
-                porcentaje += customer.porcentaje;
-                promedio++;
-            }
-        }
+const semana = ref(null);
+
+const sociedades = ref([]);
+
+const semanas = ref([]);
+
+const flujoMensual = ref([]);
+
+const cargandoSociedades = ref(false);
+
+const cargandoSemanas = ref(false);
+
+const cargandoTabla = ref(false);
+
+const flujoNeto = ref({});
+
+const saldoFinal = ref({});
+const saldoBancarios = ref({});
+
+onMounted(() => {
+    obtenerSociedades();
+});
+
+const claseTituloSubtitulo = (concepto) => {
+    if (concepto <= 2) {
+        return 'font-bold';
+    } else {
+        return 'ml-3';
     }
-
-    return Math.round(porcentaje / promedio);
 };
-const calcularTotalEjecucion = (name) => {
-    let ejecucion = 0;
 
-    if (ejecucion.value) {
-        for (let customer of ejecucion.value) {
-            if (customer.representative.name === name) {
-                ejecucion += customer.ejecucion;
-            }
-        }
+const ObtenerFlujos = (sociedad, fecha) => {
+    if (sociedad && fecha) {
+        cargandoTabla.value = true;
+        crear('esperado/esperadosemanal', { sociedad: sociedad, fecha: fecha }, 'application/json')
+            .then((res) => {
+                flujoMensual.value = res.data.data;
+                for (const fs in flujoMensual.value) {
+                    if (flujoMensual.value[fs].concepto == '7') {
+                        flujoNeto.value = flujoMensual.value[fs];
+                    }
+                    if (flujoMensual.value[fs].concepto == '8') {
+                        saldoFinal.value = flujoMensual.value[fs];
+                    }
+                    if (flujoMensual.value[fs].concepto == '9') {
+                        saldoBancarios.value = flujoMensual.value[fs];
+                    }
+                }
+            })
+            .catch((err) => {
+                toast.add({
+                    severity: 'danger',
+                    summary: 'Ups! algo salio mal al obtener los flujos de caja error:',
+                    detail: `${err}`,
+                    closable: true
+                });
+                if (flujoMensual.value) {
+                    flujoMensual.value = [];
+                }
+            })
+            .finally(() => {
+                cargandoTabla.value = false;
+            });
+    } else {
+        toast.add({
+            severity: 'info',
+            summary: 'Fecha',
+            detail: 'Por favor, renueve una fecha',
+            life: 3000
+        });
     }
-
-    return ejecucion;
 };
 
-const calcularTotalEsperado = (name) => {
-    let esperado = 0;
+const obtenerSemanas = async (sociedad) => {
+    cargandoSemanas.value = true;
+    await obtenerTodo(`/flujoCaja/semanas/${sociedad}`)
+        .then((res) => {
+            semanas.value = res.data;
+        })
+        .catch((err) => {
+            toast.add({
+                severity: 'danger',
+                summary: 'Ups! algo salio mal al obtener las sociedades error: ',
+                detail: `${err}`,
+                life: 5000
+            });
+        })
+        .finally(() => {
+            cargandoSemanas.value = false;
+        });
+};
 
-    if (ejecucion.value) {
-        for (let customer of ejecucion.value) {
-            if (customer.representative.name === name) {
-                esperado += customer.esperado;
-            }
-        }
+const filtroSociedades = (sociedad) => {
+    if (semanas.value.length > 0) {
+        ObtenerFlujos(sociedadSeleccionada.value, semana.value.name);
+    } else {
+        obtenerSemanas(sociedad);
     }
-
-    return esperado;
 };
 
-const escalaColor = (porcentaje) => {
-    if (porcentaje >= 80) return 'success';
-    if (porcentaje >= 1) return 'warning';
-    if (porcentaje == 0) return 'info';
-    return 'danger';
+const obtenerSociedades = () => {
+    cargandoSociedades.value = true;
+    obtenerTodo('sociedad/obtenerTodo')
+        .then((res) => {
+            sociedades.value = res.data;
+        })
+        .catch((err) => {
+            toast.add({
+                severity: 'danger',
+                summary: 'Error',
+                detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
+                life: 5000
+            });
+        })
+        .finally(() => {
+            cargandoSociedades.value = false;
+        });
 };
 
-const onRowGroupExpand = (event) => {
-    toast.add({ severity: 'info', summary: 'Row Group Expanded', detail: 'Value: ' + event.data, life: 3000 });
-};
-const onRowGroupCollapse = (event) => {
-    toast.add({ severity: 'success', summary: 'Row Group Collapsed', detail: 'Value: ' + event.data, life: 3000 });
-};
-const ejecucion = ref([
-    {
-        id: 1000,
-        nombre: 'SALDO INICIAL',
-        ejecucion: 2763672789,
-        esperado: 2763672789,
-        porcentaje: 100,
-        representative: {
-            name: 'SALDO INICIAL',
-            image: 'ionibowcher.png'
-        }
-    },
-    {
-        id: 1001,
-        nombre: 'RECAUDOS FEE PAO',
-        ejecucion: 1700763213,
-        esperado: 1788523079,
-        porcentaje: 95,
-        representative: {
-            name: 'ACTIVIDAD DE OPERACION',
-            image: 'amyelsner.png'
-        }
-    },
-    {
-        id: 1002,
-        nombre: 'CAPEX TICAPEX TI (LICENCIAS)',
-        ejecucion: 123,
-        esperado: 1381836394,
-        porcentaje: 95,
-        representative: {
-            name: 'ACTIVIDAD DE INVERSION',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1002,
-        nombre: 'CAPEX RECOBRO',
-        ejecucion: 123,
-        esperado: 12581836394,
-        porcentaje: 95,
-        representative: {
-            name: 'ACTIVIDAD DE INVERSION',
-            image: 'asiyajavayant.png'
-        }
-    },
-    //tres
-    {
-        id: 1003,
-        nombre: 'RECAUDOS FEE PAO',
-        ejecucion: 123,
-        esperado: 1000000,
-        porcentaje: 100,
-        representative: {
-            name: 'ACTIVIDAD DE FINANCIACION',
-            image: 'xuxuefeng.png'
-        }
-    },
-    {
-        id: 1003,
-        nombre: 'RECAUDOS FEE CS-CC',
-        ejecucion: 123,
-        esperado: 4356121315,
-        porcentaje: 0,
-        representative: {
-            name: 'ACTIVIDAD DE FINANCIACION',
-            image: 'xuxuefeng.png'
-        },
-        balance: 88521
-    },
-    {
-        id: 1003,
-        nombre: 'OTROS RECAUDOS',
-        ejecucion: 123,
-        esperado: 871224263,
-        porcentaje: 80,
-        representative: {
-            name: 'ACTIVIDAD DE FINANCIACION',
-            image: 'xuxuefeng.png'
-        }
-    },
+const imprimir = async (flujoSemanal) => {
+    const wb = XLSX.utils.book_new();
+    const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${semana.value}`;
 
-    //tres fin
+    //Elimina sociedad y semana de los flujoSemanal
+    flujoSemanal.forEach((flujo) => {
+        delete flujo.sociedad;
+        delete flujo.semana;
+    });
+    const ws = XLSX.utils.json_to_sheet(flujoSemanal);
 
-    {
-        id: 1004,
-        nombre: 'PAGO DE IVA',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 86,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1004,
-        nombre: 'PAGO DE RETENCIÓN EN LA FUENTE',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 62,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1004,
-        nombre: 'PAGO DE IMPUESTOS (RENTA, CREE Y RIQUEZA)',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 86,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1004,
-        nombre: 'PAGO DE OTROS EGRESOS',
-        ejecucion: 123,
-        esperado: 2013672789,
-        porcentaje: 86,
-        representative: {
-            name: 'OTROS EGRESOS',
-            image: 'asiyajavayant.png'
-        }
-    },
-    {
-        id: 1005,
-        nombre: 'FLUJO NETO',
-        ejecucion: 112685229,
-        esperado: 478279839,
-        porcentaje: -92,
-        representative: {
-            name: 'FLUJO NETO',
-            image: 'ivanmagalhaes.png'
-        }
-    },
-    {
-        id: 1006,
-        nombre: 'SALDO DE CAJA FINAL',
-        ejecucion: 2876358018,
-        esperado: 2713672789,
-        porcentaje: 0,
-        representative: {
-            name: 'SALDO DE CAJA FINAL',
-            image: 'ivanmagalhaes.png'
-        }
-    },
-    {
-        id: 1007,
-        nombre: 'Leota Dilliard',
-        ejecucion: 2285392950,
-        esperado: 72789,
-        porcentaje: 144,
-        representative: {
-            name: 'Sobregiro SEC',
-            image: 'onyamalimba.png'
-        }
-    }
-]);
+    // eslint-disable-next-line no-unused-vars
+    ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
+
+    const nombreHoja = semana.value.replace(/\//g, '-');
+    XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+
+    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
+};
 </script>
+
 <style lang="scss" scoped>
-.p-rowgroup-footer td {
-    font-weight: 700;
-    background-color: var(--surface-d);
-}
+//
 </style>

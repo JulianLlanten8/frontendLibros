@@ -37,6 +37,11 @@ const router = createRouter({
                     path: '/inicio/subirArchivos',
                     name: 'subirArchivos',
                     component: () => import('@/views/pages/planeacion/subirArchivos.vue')
+                },
+                {
+                    path: '/inicio/esperadoSemanal',
+                    name: 'EsperadoSemanal',
+                    component: () => import('@/views/pages/planeacion/esperadoSemanal.vue')
                 }
             ]
         },
@@ -56,9 +61,9 @@ const router = createRouter({
                     component: () => import('@/views/pages/planeacion/ReporteMensual.vue')
                 },
                 {
-                    path: '/reportes/esperadoSemanal',
-                    name: 'esperadosemanal',
-                    component: () => import('@/views/pages/planeacion/EsperadoSemanal.vue')
+                    path: '/reportes/esperado-semanal-proyectado',
+                    name: 'esperado-semanal-proyectado',
+                    component: () => import('@/views/pages/planeacion/FlujoSemanalProyectado.vue')
                 }
             ]
         },

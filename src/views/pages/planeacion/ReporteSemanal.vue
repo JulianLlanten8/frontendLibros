@@ -1,8 +1,8 @@
 <template>
     <main>
-        <DataTable :value="flujos" :loading="cargandoTabla">
+        <DataTable id="tablaFlujos" :value="flujoSemanal" :loading="cargandoTabla">
             <template #header>
-                <h3>Flujo de caja semanal :</h3>
+                <h3>Flujo de caja semanal</h3>
                 <Toolbar>
                     <template #start>
                         <div class="p-d-flex p-jc-center mr-2">
@@ -28,12 +28,19 @@
                                 optionValue="semana"
                                 placeholder="Seleccione una semana"
                                 class="my-3 w-full"
-                                showClear="true"
+                                :showClear="true"
                                 @change="ObtenerFlujos(sociedadSeleccionada, semana)"
                             />
                         </div>
                     </template>
+                    <!-- <template #end>
+                    </template> -->
                 </Toolbar>
+                <div class="flex justify-content-between flex-wrap">
+                    <cardEstadistica v-if="flujoNeto.concepto" :estadistica="flujoNeto" />
+                    <cardEstadistica v-if="saldoFinal.concepto" :estadistica="saldoFinal" />
+                    <cardEstadistica v-if="saldoBancarios.concepto" :estadistica="saldoBancarios" />
+                </div>
             </template>
             <template #empty><p class="text-center">Seleccione una sociedad.</p> </template>
             <template #loading> <h3 class="text-white my-10">Cargando flujos, Por favor espere ...</h3> </template>
@@ -69,7 +76,10 @@
                 <template #body="slotProps">
                     <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
                         {{
-                            slotProps.data.esperado == 0
+                            slotProps.data.esperado == 0 ||
+                            slotProps.data.ejecutado == 0 ||
+                            slotProps.data.esperado == '0' ||
+                            slotProps.data.ejecutado == '0'
                                 ? 0
                                 : Math.round((slotProps.data.ejecutado / slotProps.data.esperado) * 100)
                         }}%
@@ -78,7 +88,13 @@
             </Column>
             <template #footer>
                 <div class="text-center p-d-flex p-jc-between">
-                    <Button label="Imprimir" icon="pi pi-print" class="p-button-success p-mr-2" @click="imprimir" />
+                    <Button
+                        v-if="flujoSemanal.length > 0"
+                        label="Imprimir"
+                        icon="pi pi-print"
+                        class="p-button-success p-mr-2"
+                        @click="imprimir(flujoSemanal)"
+                    />
                 </div>
             </template>
         </DataTable>
@@ -88,7 +104,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { obtenerTodo, crear } from '@/service/clienteHttp';
+import { useToast } from 'primevue/usetoast';
+import * as XLSX from 'xlsx/xlsx.mjs';
 
+import cardEstadistica from '@/components/cardEstadisticaSemanal.vue';
+
+const toast = useToast();
 const sociedadSeleccionada = ref(null);
 
 const semana = ref(null);
@@ -97,13 +118,18 @@ const sociedades = ref([]);
 
 const semanas = ref([]);
 
-const flujos = ref([]);
+const flujoSemanal = ref([]);
 
 const cargandoSociedades = ref(false);
 
 const cargandoSemanas = ref(false);
 
 const cargandoTabla = ref(false);
+
+const flujoNeto = ref({});
+
+const saldoFinal = ref({});
+const saldoBancarios = ref({});
 
 onMounted(() => {
     obtenerSociedades();
@@ -118,21 +144,45 @@ const claseTituloSubtitulo = (concepto) => {
 };
 
 const ObtenerFlujos = (sociedad, fecha) => {
-    cargandoTabla.value = true;
-    crear('esperado/esperadosemanal', { sociedad: sociedad, fecha: fecha }, 'application/json')
-        .then((res) => {
-            console.log(res);
-            flujos.value = res.data.data;
-        })
-        .catch((err) => {
-            console.log(err);
-            if (flujos.value) {
-                flujos.value = [];
-            }
-        })
-        .finally(() => {
-            cargandoTabla.value = false;
+    if (sociedad && fecha) {
+        cargandoTabla.value = true;
+        crear('esperado/esperadosemanal', { sociedad: sociedad, fecha: fecha }, 'application/json')
+            .then((res) => {
+                flujoSemanal.value = res.data.data;
+                for (const fs in flujoSemanal.value) {
+                    if (flujoSemanal.value[fs].concepto == '7') {
+                        flujoNeto.value = flujoSemanal.value[fs];
+                    }
+                    if (flujoSemanal.value[fs].concepto == '8') {
+                        saldoFinal.value = flujoSemanal.value[fs];
+                    }
+                    if (flujoSemanal.value[fs].concepto == '9') {
+                        saldoBancarios.value = flujoSemanal.value[fs];
+                    }
+                }
+            })
+            .catch((err) => {
+                toast.add({
+                    severity: 'danger',
+                    summary: 'Ups! algo salio mal al obtener los flujos de caja error:',
+                    detail: `${err}`,
+                    closable: true
+                });
+                if (flujoSemanal.value) {
+                    flujoSemanal.value = [];
+                }
+            })
+            .finally(() => {
+                cargandoTabla.value = false;
+            });
+    } else {
+        toast.add({
+            severity: 'info',
+            summary: 'Fecha',
+            detail: 'Por favor, renueve una fecha',
+            life: 3000
         });
+    }
 };
 
 const obtenerSemanas = async (sociedad) => {
@@ -142,13 +192,12 @@ const obtenerSemanas = async (sociedad) => {
             semanas.value = res.data;
         })
         .catch((err) => {
-            console.log(err);
-            /* toast.add({
+            toast.add({
                 severity: 'danger',
-                summary: 'Error',
-                detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
+                summary: 'Ups! algo salio mal al obtener las sociedades error: ',
+                detail: `${err}`,
                 life: 5000
-            }); */
+            });
         })
         .finally(() => {
             cargandoSemanas.value = false;
@@ -170,247 +219,39 @@ const obtenerSociedades = () => {
             sociedades.value = res.data;
         })
         .catch((err) => {
-            console.log(err);
+            toast.add({
+                severity: 'danger',
+                summary: 'Error',
+                detail: `Ups! algo salio mal al obtener las sociedades error: ${err}`,
+                life: 5000
+            });
         })
         .finally(() => {
             cargandoSociedades.value = false;
         });
 };
 
-const imprimir = async () => {
-    const res = await obtenerTodo('archivos/descargar', 'blob');
-    const url = URL.createObjectURL(new Blob([res], { type: 'application/vnd.ms-excel' }));
+const imprimir = async (flujoSemanal) => {
+    const wb = XLSX.utils.book_new();
+    const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${semana.value}`;
 
-    const link = document.createElement('a');
+    //Elimina sociedad y semana de los flujoSemanal
+    flujoSemanal.forEach((flujo) => {
+        delete flujo.sociedad;
+        delete flujo.semana;
+    });
+    const ws = XLSX.utils.json_to_sheet(flujoSemanal);
 
-    link.href = url;
-    link.setAttribute('download', 'flujos.xlsx');
-    document.body.appendChild(link);
-    link.click();
+    // eslint-disable-next-line no-unused-vars
+    ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
+
+    console.log(nombreArchivo);
+    //remplaza 6/03/2023-12/03/2023 por 6-03-2023-12-03-2023
+    const nombreHoja = semana.value.replace(/\//g, '-');
+    XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+
+    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
 };
-
-/* const nodes = ref([
-    {
-        key: '0',
-        data: {
-            concepto: '0',
-            descripcion: 'Saldo Inicial',
-            ejecucion: 2763672789,
-            esperado: 2763672789,
-            cumplimiento: 80
-        }
-    },
-    {
-        key: '1',
-        data: {
-            concepto: '1',
-            descripcion: 'Actividad de operacion',
-            ejecucion: 340583856,
-            esperado: 420368907,
-            cumplimiento: -81
-        },
-        children: [
-            {
-                key: '1-0',
-                data: {
-                    concepto: 1,
-                    descripcion: 'Ingresos',
-                    ejecucion: 340583856,
-                    esperado: 420368907,
-                    cumplimiento: 81
-                },
-                children: [
-                    {
-                        key: '1-0-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'Recaudos Fee Pao',
-                            ejecucion: 240532926,
-                            esperado: 241000000,
-                            cumplimiento: 100
-                        }
-                    },
-                    {
-                        key: '1-0-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'OTROS RECAUDOS',
-                            ejecucion: 520348294,
-                            esperado: '-',
-                            cumplimiento: 100
-                        }
-                    }
-                ]
-            },
-            {
-                key: '0-1',
-                data: {
-                    concepto: 1,
-                    descripcion: 'Egresos',
-                    ejecucion: 0,
-                    esperado: 3004118053,
-                    cumplimiento: 80
-                },
-                children: [
-                    {
-                        key: '0-1-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE NOMINA',
-                            ejecucion: 1727272090,
-                            esperado: 2004118053,
-                            cumplimiento: 86
-                        }
-                    },
-                    {
-                        key: '0-1-1',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE HONORARIOS',
-                            ejecucion: 3500000,
-                            esperado: 1004118053,
-                            cumplimiento: 80
-                        }
-                    },
-                    {
-                        key: '0-1-2',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE IMPUESTOS',
-                            ejecucion: '-',
-                            esperado: 10418944,
-                            cumplimiento: 0
-                        }
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        key: '02',
-        data: {
-            concepto: '02',
-            descripcion: 'Actividad de inversion',
-            ejecucion: -220.15,
-            esperado: -30072080,
-            cumplimiento: 1
-        },
-        children: [
-            {
-                key: '4-0',
-                data: {
-                    concepto: 1,
-                    descripcion: 'Egresos',
-                    ejecucion: 2121060577,
-                    esperado: 2449891985,
-                    cumplimiento: 87
-                },
-                children: [
-                    {
-                        key: '4-0-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'CAPEX TI (LICENCIAS)',
-                            ejecucion: '-',
-                            esperado: 30072080,
-                            cumplimiento: 0
-                        }
-                    },
-                    {
-                        key: '4-0-1',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'CAPEX RECOBRO',
-                            ejecucion: 220150,
-                            esperado: '-',
-                            cumplimiento: 0
-                        }
-                    }
-                ]
-            }
-        ]
-    },
-    {
-        key: '03',
-        data: {
-            concepto: '03',
-            descripcion: 'Actividad de financiacion',
-            ejecucion: 340583856,
-            esperado: 420368907,
-            cumplimiento: -81
-        },
-        children: [
-            {
-                key: '3-0',
-                data: { concepto: 1, descripcion: 'Ingresos', ejecucion: 2340000, esperado: '-', cumplimiento: 80 },
-                children: [
-                    {
-                        key: '3-0-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PRESTAMOS DE PARTICULARES RECIBIDOS',
-                            ejecucion: '-',
-                            esperado: '-',
-                            cumplimiento: 0
-                        }
-                    }
-                ]
-            },
-            {
-                key: '3-0-0',
-                data: {
-                    concepto: 1,
-                    descripcion: 'Egresos',
-                    ejecucion: '-',
-                    esperado: 10418944,
-                    cumplimiento: 80
-                },
-                children: [
-                    {
-                        key: '3-1-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE INTERESES',
-                            ejecucion: '-',
-                            esperado: '-',
-                            cumplimiento: 0
-                        }
-                    },
-                    {
-                        key: '3-1-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE COMISIONES',
-                            ejecucion: 41894,
-                            esperado: 10418944,
-                            cumplimiento: 80
-                        }
-                    },
-                    {
-                        key: '3-1-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE OBLIGACIÓN - AMORTIZACIÓN A CAPITAL',
-                            ejecucion: '-',
-                            esperado: 10418944,
-                            cumplimiento: 0
-                        }
-                    },
-                    {
-                        key: '3-2-0',
-                        data: {
-                            concepto: 1,
-                            descripcion: 'PAGO DE GASTOS BANCARIOS',
-                            ejecucion: 5728365,
-                            esperado: '-',
-                            cumplimiento: 0
-                        }
-                    }
-                ]
-            }
-        ]
-    }
-]); */
 </script>
 
 <style lang="scss" scoped>
