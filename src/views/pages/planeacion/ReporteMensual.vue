@@ -15,21 +15,21 @@
                                 :editable="true"
                                 :loading="cargandoSociedades"
                                 placeholder="Selecione una sociedad"
-                                @change="filtroSociedades(sociedadSeleccionada)"
+                                @change="ObtenerFlujosMensuales()"
                             />
                         </div>
-                        <div class="p-d-flex p-jc-center">
-                            <Dropdown
-                                v-model="semana"
-                                :options="semanas"
-                                :loading="cargandoSemanas"
-                                emptyMessage="No hay semanas disponibles"
-                                optionLabel="semana"
-                                optionValue="semana"
-                                placeholder="Seleccione una semana"
-                                class="my-3 w-full"
-                                :showClear="true"
-                                @change="ObtenerFlujos(sociedadSeleccionada, semana)"
+                        <div class="p-d-flex p-jc-center mr-2">
+                            <Calendar
+                                class="w-full"
+                                v-model="mes"
+                                view="month"
+                                dateFormat="mm/yy"
+                                placeholder="mm/yy"
+                                :showIcon="true"
+                                :showButtonBar="true"
+                                :monthNavigator="true"
+                                :yearNavigator="true"
+                                @update:modelValue="ObtenerFlujosMensuales()"
                             />
                         </div>
                     </template>
@@ -46,35 +46,35 @@
             <template #loading> <h3 class="text-white my-10">Cargando flujos, Por favor espere ...</h3> </template>
             <Column field="concepto" header="Concepto">
                 <template #body="slotProps">
-                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto)">
                         {{ slotProps.data.concepto }}
                     </span>
                 </template>
             </Column>
             <Column field="descripcion" header="Descripción">
                 <template #body="slotProps">
-                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto)">
                         {{ slotProps.data.descripcion }}
                     </span>
                 </template>
             </Column>
             <Column field="ejecucion" header="Ejecución" class="text-right" headerStyle="text-right">
                 <template #body="slotProps">
-                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto)">
                         {{ $formatoMonedaCOP(slotProps.data.ejecutado) }}
                     </span>
                 </template>
             </Column>
             <Column field="esperado" header="Esperado" class="text-right">
                 <template #body="slotProps">
-                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto)">
                         {{ $formatoMonedaCOP(slotProps.data.esperado) }}
                     </span>
                 </template>
             </Column>
             <Column field="porcentaje" header="Cumplimiento">
                 <template #body="slotProps">
-                    <span :class="claseTituloSubtitulo(slotProps.data.concepto.length)">
+                    <span :class="claseTituloSubtitulo(slotProps.data.concepto)">
                         {{
                             slotProps.data.esperado == 0 ||
                             slotProps.data.ejecutado == 0 ||
@@ -103,7 +103,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { obtenerTodo, crear } from '@/service/clienteHttp';
+import { obtenerTodo /* crear */ } from '@/service/clienteHttp';
 import { useToast } from 'primevue/usetoast';
 import * as XLSX from 'xlsx/xlsx.mjs';
 
@@ -112,17 +112,13 @@ import cardEstadistica from '@/components/cardEstadisticaSemanal.vue';
 const toast = useToast();
 const sociedadSeleccionada = ref(null);
 
-const semana = ref(null);
+const mes = ref(null);
 
 const sociedades = ref([]);
-
-const semanas = ref([]);
 
 const flujoMensual = ref([]);
 
 const cargandoSociedades = ref(false);
-
-const cargandoSemanas = ref(false);
 
 const cargandoTabla = ref(false);
 
@@ -136,80 +132,48 @@ onMounted(() => {
 });
 
 const claseTituloSubtitulo = (concepto) => {
-    if (concepto <= 2) {
+    if (typeof concepto === 'string' && concepto.length <= 2) {
         return 'font-bold';
     } else {
         return 'ml-3';
     }
 };
 
-const ObtenerFlujos = (sociedad, fecha) => {
-    if (sociedad && fecha) {
-        cargandoTabla.value = true;
-        crear('esperado/esperadosemanal', { sociedad: sociedad, fecha: fecha }, 'application/json')
-            .then((res) => {
-                flujoMensual.value = res.data.data;
-                for (const fs in flujoMensual.value) {
-                    if (flujoMensual.value[fs].concepto == '7') {
-                        flujoNeto.value = flujoMensual.value[fs];
-                    }
-                    if (flujoMensual.value[fs].concepto == '8') {
-                        saldoFinal.value = flujoMensual.value[fs];
-                    }
-                    if (flujoMensual.value[fs].concepto == '9') {
-                        saldoBancarios.value = flujoMensual.value[fs];
-                    }
-                }
-            })
-            .catch((err) => {
-                toast.add({
-                    severity: 'danger',
-                    summary: 'Ups! algo salio mal al obtener los flujos de caja error:',
-                    detail: `${err}`,
-                    closable: true
-                });
-                if (flujoMensual.value) {
-                    flujoMensual.value = [];
-                }
-            })
-            .finally(() => {
-                cargandoTabla.value = false;
-            });
-    } else {
-        toast.add({
-            severity: 'info',
-            summary: 'Fecha',
-            detail: 'Por favor, renueve una fecha',
-            life: 3000
-        });
+const ObtenerFlujosMensuales = () => {
+    if (!sociedadSeleccionada.value || !mes.value) {
+        return;
     }
-};
 
-const obtenerSemanas = async (sociedad) => {
-    cargandoSemanas.value = true;
-    await obtenerTodo(`/flujoCaja/semanas/${sociedad}`)
+    cargandoTabla.value = true;
+    obtenerTodo(`esperado/mensual/${mes.value.getFullYear()}/${mes.value.getMonth() + 1}/${sociedadSeleccionada.value}`)
         .then((res) => {
-            semanas.value = res.data;
+            flujoMensual.value = res.data;
+            for (const fs in flujoMensual.value) {
+                if (flujoMensual.value[fs].concepto == '7') {
+                    flujoNeto.value = flujoMensual.value[fs];
+                }
+                if (flujoMensual.value[fs].concepto == '8') {
+                    saldoFinal.value = flujoMensual.value[fs];
+                }
+                if (flujoMensual.value[fs].concepto == '9') {
+                    saldoBancarios.value = flujoMensual.value[fs];
+                }
+            }
         })
         .catch((err) => {
             toast.add({
                 severity: 'danger',
-                summary: 'Ups! algo salio mal al obtener las sociedades error: ',
+                summary: 'Ups! algo salio mal al obtener los flujos de caja error:',
                 detail: `${err}`,
-                life: 5000
+                closable: true
             });
+            if (flujoMensual.value) {
+                flujoMensual.value = [];
+            }
         })
         .finally(() => {
-            cargandoSemanas.value = false;
+            cargandoTabla.value = false;
         });
-};
-
-const filtroSociedades = (sociedad) => {
-    if (semanas.value.length > 0) {
-        ObtenerFlujos(sociedadSeleccionada.value, semana.value.name);
-    } else {
-        obtenerSemanas(sociedad);
-    }
 };
 
 const obtenerSociedades = () => {
@@ -233,7 +197,7 @@ const obtenerSociedades = () => {
 
 const imprimir = async (flujoSemanal) => {
     const wb = XLSX.utils.book_new();
-    const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${semana.value}`;
+    const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${mes.value}`;
 
     //Elimina sociedad y semana de los flujoSemanal
     flujoSemanal.forEach((flujo) => {
@@ -245,7 +209,7 @@ const imprimir = async (flujoSemanal) => {
     // eslint-disable-next-line no-unused-vars
     ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
 
-    const nombreHoja = semana.value.replace(/\//g, '-');
+    const nombreHoja = mes.value.replace(/\//g, '-');
     XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
 
     XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);

@@ -103,7 +103,7 @@ import Editor from 'primevue/editor';
 
 import CodeHighlight from '@/components/CodeHighlight.vue';
 import BlockViewer from '@/components/BlockViewer.vue';
-
+import es from './assets/locales/es';
 import '@/assets/styles.scss';
 
 import { formatoMonedaCOP } from '@/utils/globals';
@@ -113,7 +113,7 @@ app.config.performance = true;
 
 app.config.globalProperties.$formatoMonedaCOP = formatoMonedaCOP;
 app.use(router);
-app.use(PrimeVue, { ripple: true });
+app.use(PrimeVue, { ripple: true, locale: es.es });
 app.use(ToastService);
 app.use(DialogService);
 app.use(ConfirmationService);

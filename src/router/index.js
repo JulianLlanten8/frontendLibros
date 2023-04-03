@@ -36,12 +36,12 @@ const router = createRouter({
                 {
                     path: '/inicio/subirArchivos',
                     name: 'subirArchivos',
-                    component: () => import('@/views/pages/planeacion/subirArchivos.vue')
+                    component: () => import('@/views/pages/planeacion/SubirArchivos.vue')
                 },
                 {
                     path: '/inicio/esperadoSemanal',
                     name: 'EsperadoSemanal',
-                    component: () => import('@/views/pages/planeacion/esperadoSemanal.vue')
+                    component: () => import('@/views/pages/planeacion/EsperadoSemanal.vue')
                 }
             ]
         },
