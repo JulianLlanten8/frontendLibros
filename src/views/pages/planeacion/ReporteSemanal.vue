@@ -107,7 +107,7 @@ import { obtenerTodo, crear } from '@/service/clienteHttp';
 import { useToast } from 'primevue/usetoast';
 import * as XLSX from 'xlsx/xlsx.mjs';
 
-import cardEstadistica from '@/components/cardEstadisticaSemanal.vue';
+import cardEstadistica from '@/components/CardEstadisticaSemanal.vue';
 
 const toast = useToast();
 const sociedadSeleccionada = ref(null);
