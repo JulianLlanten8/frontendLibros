@@ -148,6 +148,7 @@ const ObtenerFlujosMensuales = () => {
     obtenerTodo(`esperado/mensual/${mes.value.getFullYear()}/${mes.value.getMonth() + 1}/${sociedadSeleccionada.value}`)
         .then((res) => {
             flujoMensual.value = res.data;
+            flujoMensual.value.pop();
             for (const fs in flujoMensual.value) {
                 if (flujoMensual.value[fs].concepto == '7') {
                     flujoNeto.value = flujoMensual.value[fs];

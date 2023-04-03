@@ -118,7 +118,7 @@ import AppConfig from '@/layout/AppConfig.vue';
 import router from '@/router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email } from '@vuelidate/validators';
-import { enviarDatos } from '@/service/clienteHttp';
+import { enviarDatos, obtenerTodo } from '@/service/clienteHttp';
 const { layoutConfig, contextPath } = useLayout();
 const error = ref('');
 const submitted = ref('');
@@ -143,7 +143,8 @@ const iniciarSesion = async (isFormValid) => {
             if (res?.access_token) {
                 sessionStorage.setItem('token', res.access_token);
                 sessionStorage.setItem('token_type', res.token_type);
-                router.push('/inicio/dashboard');
+                obtenerDatosUsuario();
+                router.push('/reportes/semanales');
             }
             if (res?.status === 401) {
                 error.value = res.data.message;
@@ -156,6 +157,16 @@ const iniciarSesion = async (isFormValid) => {
             isLoading.value = false;
         });
 };
+
+const obtenerDatosUsuario = async () => {
+    if (sessionStorage.getItem('token')) {
+        await obtenerTodo('usuario/obtenerDatosUsuario').then((response) => {
+            sessionStorage.setItem('USER', JSON.stringify(response.user));
+            return response;
+        });
+    }
+};
+
 const rules = {
     email: { required, email },
     password: { required }
