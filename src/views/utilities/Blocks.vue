@@ -253,7 +253,7 @@
                 </a>
                 <a
                     v-ripple
-                    class="flex align-items-center no-underline justify-content-center border-circle text-gray-50 hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150 p-ripple"
+                    class="flex align-items-center hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150 p-ripple"
                     style="width: 2rem; height: 2rem"
                 >
                     <i class="pi pi-times"></i>
@@ -490,14 +490,16 @@ const block1 = ref(`<div class="grid grid-nogutter surface-section text-800">
         <section>
             <span class="block text-6xl font-bold mb-1">Create the screens your</span>
             <div class="text-6xl text-primary font-bold mb-3">your visitors deserve to see</div>
-            <p class="mt-0 mb-4 text-700 line-height-3">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <p class="mt-0 mb-4 text-700 line-height-3">Lorem ipsum dolor sit amet, ut labore et dolore magna aliqua.</p>
 
             <Button label="Learn More" type="button" class="mr-3 p-button-raised"></Button>
             <Button label="Live Demo" type="button" class="p-button-outlined"></Button>
         </section>
     </div>
     <div class="col-12 md:col-6 overflow-hidden">
-        <img src="/demo/images/blocks/hero/hero-1.png" alt="Image" class="md:ml-auto block md:h-full" style="clip-path: polygon(8% 0, 100% 0%, 100% 100%, 0 100%)">
+        <img src="/demo/images/blocks/hero/hero-1.png" 
+        alt="Image" class="md:ml-auto block md:h-full" 
+        style="clip-path: polygon(8% 0, 100% 0%, 100% 100%, 0 100%)">
     </div>
 </div>`);
 const block2 = ref(`<div class="surface-section px-4 py-8 md:px-6 lg:px-8 text-center">
@@ -512,21 +514,27 @@ const block2 = ref(`<div class="surface-section px-4 py-8 md:px-6 lg:px-8 text-c
                 <i class="pi pi-desktop text-4xl text-blue-500"></i>
             </span>
             <div class="text-900 mb-3 font-medium">Built for Developers</div>
-            <span class="text-700 text-sm line-height-3">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</span>
+            <span class="text-700 text-sm line-height-3">
+                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            </span>
         </div>
         <div class="col-12 md:col-4 mb-4 px-5">
             <span class="p-3 shadow-2 mb-3 inline-block surface-card" style="border-radius: 10px">
                 <i class="pi pi-lock text-4xl text-blue-500"></i>
             </span>
             <div class="text-900 mb-3 font-medium">End-to-End Encryption</div>
-            <span class="text-700 text-sm line-height-3">Risus nec feugiat in fermentum posuere urna nec. Posuere sollicitudin aliquam ultrices sagittis.</span>
+            <span class="text-700 text-sm line-height-3">
+                Risus nec feugiat in fermentum posuere urna nec. Posuere sollicitudin aliquam ultrices sagittis.
+            </span>
         </div>
         <div class="col-12 md:col-4 mb-4 px-5">
             <span class="p-3 shadow-2 mb-3 inline-block surface-card" style="border-radius: 10px">
                 <i class="pi pi-check-circle text-4xl text-blue-500"></i>
             </span>
             <div class="text-900 mb-3 font-medium">Easy to Use</div>
-            <span class="text-700 text-sm line-height-3">Ornare suspendisse sed nisi lacus sed viverra tellus. Neque volutpat ac tincidunt vitae semper.</span>
+            <span class="text-700 text-sm line-height-3">
+                Ornare suspendisse sed nisi lacus sed viverra tellus. Neque volutpat ac tincidunt vitae semper.
+            </span>
         </div>
         <div class="col-12 md:col-4 mb-4 px-5">
             <span class="p-3 shadow-2 mb-3 inline-block surface-card" style="border-radius: 10px">
@@ -540,21 +548,27 @@ const block2 = ref(`<div class="surface-section px-4 py-8 md:px-6 lg:px-8 text-c
                 <i class="pi pi-github text-4xl text-blue-500"></i>
             </span>
             <div class="text-900 mb-3 font-medium">Open Source</div>
-            <span class="text-700 text-sm line-height-3">Nec tincidunt praesent semper feugiat. Sed adipiscing diam donec adipiscing tristique risus nec feugiat. </span>
+            <span class="text-700 text-sm line-height-3">
+                Nec tincidunt praesent semper feugiat. Sed adipiscing diam donec adipiscing tristique risus nec feugiat. 
+            </span>
         </div>
         <div class="col-12 md:col-4 md:mb-4 mb-0 px-3">
             <span class="p-3 shadow-2 mb-3 inline-block surface-card" style="border-radius: 10px">
                 <i class="pi pi-shield text-4xl text-blue-500"></i>
             </span>
             <div class="text-900 mb-3 font-medium">Trusted Securitty</div>
-            <span class="text-700 text-sm line-height-3">Mattis rhoncus urna neque viverra justo nec ultrices. Id cursus metus aliquam eleifend.</span>
+            <span class="text-700 text-sm line-height-3">
+                Mattis rhoncus urna neque viverra justo nec ultrices. Id cursus metus aliquam eleifend.
+            </span>
         </div>
     </div>
 </div>`);
 
 const block3 = ref(`<div class="surface-ground px-4 py-8 md:px-6 lg:px-8">
     <div class="text-900 font-bold text-6xl mb-4 text-center">Pricing Plans</div>
-    <div class="text-700 text-xl mb-6 text-center line-height-3">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit numquam eligendi quos.</div>
+    <div class="text-700 text-xl mb-6 text-center line-height-3">
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Velit numquam eligendi quos.
+    </div>
 
     <div class="grid">
         <div class="col-12 lg:col-4">
@@ -686,7 +700,16 @@ const block5 =
     <a class="flex align-items-center ml-2 mr-8">
         <a class="text-white" href="#"><span class="underline font-bold">Learn More</span></a>
     </a>
-    <a v-ripple class="flex align-items-center no-underline justify-content-center border-circle text-gray-50 hover:bg-bluegray-700 cursor-pointer transition-colors transition-duration-150 p-ripple" style="width:2rem; height: 2rem">
+    <a 
+        v-ripple 
+        class="
+            flex align-items-center 
+            no-underline justify-content-center 
+            border-circle text-gray-50 
+            hover:bg-bluegray-700 cursor-pointer 
+            transition-colors transition-duration-150 
+            p-ripple" 
+        style="width:2rem; height: 2rem">
         <i class="pi pi-times"></i>
     </a>
 </div>`);

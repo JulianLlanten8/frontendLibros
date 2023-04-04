@@ -39,9 +39,9 @@ const router = createRouter({
                     component: () => import('@/views/pages/planeacion/SubirArchivos.vue')
                 },
                 {
-                    path: '/inicio/esperadoSemanal',
-                    name: 'EsperadoSemanal',
-                    component: () => import('@/views/pages/planeacion/EsperadoSemanal.vue')
+                    path: '/inicio/saldos',
+                    name: 'saldos',
+                    component: () => import('@/views/pages/planeacion/Saldos.vue')
                 }
             ]
         },

@@ -12,9 +12,9 @@
                 "
             >
                 <form
-                    @submit.prevent="iniciarSesion(!v$.$invalid)"
                     class="w-full surface-card py-8 px-5 sm:px-8"
                     style="border-radius: 53px"
+                    @keyup.enter="iniciarSesion(!v$.$invalid)"
                 >
                     <div class="text-center mb-5">
                         <div class="text-900 text-3xl font-medium mb-3">Planeación</div>
@@ -119,7 +119,7 @@ import router from '@/router';
 import { useVuelidate } from '@vuelidate/core';
 import { required, email } from '@vuelidate/validators';
 import { enviarDatos, obtenerTodo } from '@/service/clienteHttp';
-const { layoutConfig, contextPath } = useLayout();
+const { contextPath } = useLayout();
 const error = ref('');
 const submitted = ref('');
 const isLoading = ref(false);

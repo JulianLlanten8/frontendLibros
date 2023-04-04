@@ -23,7 +23,7 @@
                     <i class="pi pi-bars text-4xl"></i>
                 </a>
                 <div
-                    class="align-items-center surface-0 flex-grow-1 justify-content-between hidden lg:flex absolute lg:static w-full left-0 px-6 lg:px-0 z-2"
+                    class="align-items-center surface-0 flex-grow-1 justify-content-between hidden lg:flex absolute w-full left-0 px-6 lg:px-0 z-2"
                     style="top: 120px"
                 >
                     <ul

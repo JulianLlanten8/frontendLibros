@@ -33,8 +33,17 @@
                             />
                         </div>
                     </template>
-                    <!-- <template #end>
-                    </template> -->
+                    <template #end>
+                        <div class="text-center p-d-flex p-jc-between">
+                            <Button
+                                v-if="flujoMensual.length > 0"
+                                label="Imprimir"
+                                icon="pi pi-print"
+                                class="p-button-success p-mr-2"
+                                @click="imprimir(flujoMensual)"
+                            />
+                        </div>
+                    </template>
                 </Toolbar>
                 <div class="flex justify-content-between flex-wrap">
                     <cardEstadistica v-if="flujoNeto.concepto" :estadistica="flujoNeto" />
@@ -86,17 +95,7 @@
                     </span>
                 </template>
             </Column>
-            <template #footer>
-                <div class="text-center p-d-flex p-jc-between">
-                    <Button
-                        v-if="flujoMensual.length > 0"
-                        label="Imprimir"
-                        icon="pi pi-print"
-                        class="p-button-success p-mr-2"
-                        @click="imprimir(flujoMensual)"
-                    />
-                </div>
-            </template>
+            <template #footer></template>
         </DataTable>
     </main>
 </template>

@@ -46,7 +46,7 @@ const model = ref([
             {
                 label: 'Ingresar saldos',
                 icon: 'pi pi-fw pi-wallet',
-                to: '/inicio/EsperadoSemanal'
+                to: '/inicio/saldos'
             },
             {
                 label: 'Subir archivos',

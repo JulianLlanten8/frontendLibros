@@ -33,8 +33,17 @@
                             />
                         </div>
                     </template>
-                    <!-- <template #end>
-                    </template> -->
+                    <template #end>
+                        <Button
+                            v-if="flujoSemanal.length > 0"
+                            label="Imprimir"
+                            icon="pi pi-print"
+                            class="p-button-success p-mr-2"
+                            :loading="descargandoExcel"
+                            loadingIcon="pi pi-spin pi-clock"
+                            @click="imprimir(flujoSemanal)"
+                        />
+                    </template>
                 </Toolbar>
                 <div class="flex justify-content-between flex-wrap">
                     <cardEstadistica v-if="flujoNeto.concepto" :estadistica="flujoNeto" />
@@ -86,17 +95,7 @@
                     </span>
                 </template>
             </Column>
-            <template #footer>
-                <div class="text-center p-d-flex p-jc-between">
-                    <Button
-                        v-if="flujoSemanal.length > 0"
-                        label="Imprimir"
-                        icon="pi pi-print"
-                        class="p-button-success p-mr-2"
-                        @click="imprimir(flujoSemanal)"
-                    />
-                </div>
-            </template>
+            <template #footer></template>
         </DataTable>
     </main>
 </template>
@@ -130,6 +129,8 @@ const flujoNeto = ref({});
 
 const saldoFinal = ref({});
 const saldoBancarios = ref({});
+
+const descargandoExcel = ref(false);
 
 onMounted(() => {
     obtenerSociedades();
@@ -232,25 +233,37 @@ const obtenerSociedades = () => {
 };
 
 const imprimir = async (flujoSemanal) => {
-    const wb = XLSX.utils.book_new();
-    const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${semana.value}`;
+    try {
+        descargandoExcel.value = true;
+        const wb = XLSX.utils.book_new();
+        const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${semana.value}`;
 
-    //Elimina sociedad y semana de los flujoSemanal
-    flujoSemanal.forEach((flujo) => {
-        delete flujo.sociedad;
-        delete flujo.semana;
-    });
-    const ws = XLSX.utils.json_to_sheet(flujoSemanal);
+        //Elimina sociedad y semana de los flujoSemanal
+        flujoSemanal.forEach((flujo) => {
+            delete flujo.sociedad;
+            delete flujo.semana;
+        });
+        const ws = XLSX.utils.json_to_sheet(flujoSemanal);
 
-    // eslint-disable-next-line no-unused-vars
-    ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
+        // eslint-disable-next-line no-unused-vars
+        ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
 
-    console.log(nombreArchivo);
-    //remplaza 6/03/2023-12/03/2023 por 6-03-2023-12-03-2023
-    const nombreHoja = semana.value.replace(/\//g, '-');
-    XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+        console.log(nombreArchivo);
+        //remplaza 6/03/2023-12/03/2023 por 6-03-2023-12-03-2023
+        const nombreHoja = semana.value.replace(/\//g, '-');
+        XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
 
-    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
+        XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
+    } catch (error) {
+        toast.add({
+            severity: 'danger',
+            summary: 'Ups! algo salio mal al generar el archivo error:',
+            detail: `${error}`,
+            closable: true
+        });
+    } finally {
+        descargandoExcel.value = false;
+    }
 };
 </script>
 
