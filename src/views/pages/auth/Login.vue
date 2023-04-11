@@ -3,7 +3,7 @@
         class="surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden"
     >
         <div class="flex flex-column align-items-center justify-content-center">
-            <img :src="logoUrl" alt="Sakai logo" class="mb-5 w-6rem flex-shrink-0" />
+            <img :src="logoUrl" alt="Sakai logo" class="w-5rem flex-shrink-0" />
             <div
                 style="
                     border-radius: 56px;

@@ -27,7 +27,7 @@ const guardsLogin = (to, from, next) => {
             clearSession();
             next();
         }
-        next({ name: 'dashboard' });
+        next({ name: 'semanales' });
     } else {
         next();
     }
@@ -39,7 +39,7 @@ const checkRole = (to, from, next) => {
         if (user.role === 'admin') {
             next();
         } else {
-            next({ name: 'dashboard' });
+            next({ name: 'semanales' });
         }
     } else {
         next({ name: 'login' });

@@ -235,25 +235,29 @@ const obtenerSociedades = () => {
 const imprimir = async (flujoSemanal) => {
     try {
         descargandoExcel.value = true;
-        const wb = XLSX.utils.book_new();
+        const libro = XLSX.utils.book_new();
         const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${semana.value}`;
 
         //Elimina sociedad y semana de los flujoSemanal
         flujoSemanal.forEach((flujo) => {
             delete flujo.sociedad;
             delete flujo.semana;
+            flujo.esperado = parseFloat(flujo.esperado);
+            flujo.ejecutado = parseFloat(flujo.ejecutado);
         });
-        const ws = XLSX.utils.json_to_sheet(flujoSemanal);
-
+        let hojaDeCalculo = XLSX.utils.json_to_sheet(flujoSemanal);
+        hojaDeCalculo['!cols'] = [
+            { wpx: 100 },
+            { wpx: 300 },
+            { wpx: 100, alignment: { horizontal: 'right' }, style: { numFmt: '#,##0' } },
+            { wpx: 100, alignment: { horizontal: 'right' }, style: { numFmt: '#,##0' } }
+        ];
         // eslint-disable-next-line no-unused-vars
-        ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
-
-        console.log(nombreArchivo);
-        //remplaza 6/03/2023-12/03/2023 por 6-03-2023-12-03-2023
+        // ws['!cols'] = flujoSemanal.map((x) => ({ style: { numFmt: '#,##0' } }));
         const nombreHoja = semana.value.replace(/\//g, '-');
-        XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+        XLSX.utils.book_append_sheet(libro, hojaDeCalculo, nombreHoja);
 
-        XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);
+        XLSX.writeFile(libro, `${nombreArchivo}.xlsx`);
     } catch (error) {
         toast.add({
             severity: 'danger',

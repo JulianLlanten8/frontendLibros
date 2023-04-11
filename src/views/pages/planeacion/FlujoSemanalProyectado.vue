@@ -1,8 +1,10 @@
 <template>
     <main>
-        <DataTable id="tablaFlujos" :value="flujo_caja" :loading="cargandoTabla" scrollable>
-            <template #header>
+        <Card>
+            <template #title>
                 <h3>Flujo de caja semanal proyectado</h3>
+            </template>
+            <template #content>
                 <Toolbar>
                     <template #start>
                         <div class="p-d-flex p-jc-center mr-2">
@@ -48,30 +50,46 @@
                     </template>
                 </Toolbar>
             </template>
-            <template #empty v-if="flujoSemanalProyectado.length === 0">
-                <p class="text-center">Seleccione una sociedad y semana inicial</p>
-            </template>
-            <template #loading> <h3 class="text-white my-10">Cargando flujos, Por favor espere ...</h3> </template>
-            <!--<Column field="concepto" header="Concepto">
-                <template #body="slotProps">
-                    <span>
-                        {{ slotProps.data.concepto }}
-                    </span>
-                </template>
-            </Column>
-            <Column field="descripcion" header="Concepto">
-                <template #body="slotProps">
-                    <span>
-                        {{ slotProps.data.descripcion }}
-                    </span>
-                </template>
-            </Column>
-            <Column field="0" header="prueba"> </Column> -->
-            <Column field="" header=""></Column>
-
-            <!-- <template #footer> </template> -->
-        </DataTable>
+        </Card>
     </main>
+    <!-- <table v-if="flujoSemanalProyectado">
+        <tr>
+            <th>Concepto</th>
+            <th>Descripcion</th>
+
+            <th v-for="cabecera in cabecerasfor" :key="cabecera.key">
+                {{ cabecera }}
+            </th>
+
+            
+        </tr>
+        
+        <td>
+            <tr v-for="concepto in generalTable.concepto" :key="concepto.key">
+                {{
+                    concepto
+                }}
+            </tr>
+        </td>
+
+        <td>
+            <tr v-for="descripcion in generalTable.descripcion" :key="descripcion.key">
+                {{
+                    descripcion
+                }}
+            </tr>
+        </td>
+
+        
+        <td v-for="pro in proyectado" :key="pro">
+            <tr>
+                {{
+                    pro
+                }}
+            </tr>
+        </td>
+        
+    </table> -->
 </template>
 
 <script setup>
@@ -89,12 +107,15 @@ const sociedades = ref([]);
 const semanas = ref([]);
 
 const flujoSemanalProyectado = ref([]);
+const generalTable = ref([]);
+const cabecerasfor = ref([]);
 
 const cargandoSociedades = ref(false);
 
 const cargandoSemanas = ref(false);
 
 const cargandoTabla = ref(false);
+const proyectado = ref([]);
 
 const flujo_caja = ref([]);
 const cargandoImprimir = ref(false);
@@ -117,23 +138,47 @@ const ObtenerFlujosProyectados = (sociedad, fecha) => {
     obtenerTodo(`esperado/obtenerTodo/${sociedad}/${fecha}`)
         .then((res) => {
             flujoSemanalProyectado.value = res;
-            /* res[0].map((e, i) => {
-                flujo_caja.value.push({
-                    concepto: e.concepto,
-                    descripcion: e.descripcion
-                });
-            });
-            res.map((e, index) => {
-                flujo_caja.value.push({
-                    ejecutado: res[index].map((e) => {
-                        return e.ejecutado;
-                    }),
-                    esperado: res[index].map((e) => {
-                        return e.esperado;
-                    })
-                });
-                console.log(flujo_caja.value);
-            }); */
+            console.log(flujoSemanalProyectado.value[0]);
+            let general = {};
+            let concepto = [];
+            let descripcion = [];
+            for (const key in flujoSemanalProyectado.value[0]) {
+                concepto.push(flujoSemanalProyectado.value[0][key].concepto);
+                descripcion.push(flujoSemanalProyectado.value[0][key].descripcion);
+            }
+            general['concepto'] = concepto;
+            general['descripcion'] = descripcion;
+            generalTable.value = general;
+            let cabeceras = [];
+            let pro = [];
+
+            for (var i = 0; i < flujoSemanalProyectado.value.length; i++) {
+                cabeceras.push('ejecutado');
+                cabeceras.push('esperado');
+                cabeceras.push('cumplimiento');
+                pro.push(flujoSemanalProyectado.value[i][0].ejecutado);
+                pro.push(flujoSemanalProyectado.value[i][0].esperado);
+                const cumplimiento = () => {
+                    if (
+                        (flujoSemanalProyectado.value[i][0].ejecutado === 0 &&
+                            flujoSemanalProyectado.value[i][0].esperado === 0) ||
+                        (flujoSemanalProyectado.value[i][0].ejecutado === null &&
+                            flujoSemanalProyectado.value[i][0].esperado === null)
+                    ) {
+                        return 0;
+                    } else {
+                        return (
+                            (flujoSemanalProyectado.value[i][0].ejecutado /
+                                flujoSemanalProyectado.value[i][0].esperado) *
+                            100
+                        ).toFixed(2);
+                    }
+                };
+                pro.push(`%${cumplimiento()}`);
+            }
+            console.log(pro);
+            proyectado.value = pro;
+            cabecerasfor.value = cabeceras;
 
             toast.add({
                 severity: 'success',
@@ -231,5 +276,9 @@ const imprimir = async () => {
 </script>
 
 <style lang="scss" scoped>
-//
+table {
+    border: 1px solid black;
+    border-collapse: collapse;
+    width: 100%;
+}
 </style>
