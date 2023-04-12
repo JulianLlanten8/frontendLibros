@@ -52,6 +52,16 @@
             </template>
         </Card>
     </main>
+    <Card v-if="flujo_caja" class="mt-3">
+        <template #title>
+            <h3 class="text-center text-green-500">{{ flujo_caja.sociedad }}</h3>
+            <h3 class="text-2xl">{{ flujo_caja.descripcion }}</h3>
+        </template>
+        <template #content>
+            <p>{{ flujo_caja.semana }}</p>
+            <h3>{{ $formatoMonedaCOP(flujo_caja?.esperado) }}</h3>
+        </template>
+    </Card>
     <!-- <table v-if="flujoSemanalProyectado">
         <tr>
             <th>Concepto</th>
@@ -138,7 +148,10 @@ const ObtenerFlujosProyectados = (sociedad, fecha) => {
     obtenerTodo(`esperado/obtenerTodo/${sociedad}/${fecha}`)
         .then((res) => {
             flujoSemanalProyectado.value = res;
-            console.log(flujoSemanalProyectado.value[0]);
+            console.log(res);
+            flujo_caja.value = res.at(-1);
+            flujo_caja.value = flujo_caja.value.at(-2);
+            // console.log(flujoSemanalProyectado.value[0]);
             let general = {};
             let concepto = [];
             let descripcion = [];
@@ -176,7 +189,7 @@ const ObtenerFlujosProyectados = (sociedad, fecha) => {
                 };
                 pro.push(`%${cumplimiento()}`);
             }
-            console.log(pro);
+            // console.log(pro);
             proyectado.value = pro;
             cabecerasfor.value = cabeceras;
 

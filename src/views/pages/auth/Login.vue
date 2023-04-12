@@ -76,6 +76,7 @@
                             :class="{ 'p-invalid': (v$.password.$invalid && submitted) || error }"
                             inputClass="w-full"
                             inputStyle="padding:1rem"
+                            toggleMask
                         >
                         </Password>
                         <small v-if="v$.password.$invalid && submitted" class="p-error">

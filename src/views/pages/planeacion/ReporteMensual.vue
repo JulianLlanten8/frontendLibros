@@ -195,21 +195,21 @@ const obtenerSociedades = () => {
         });
 };
 
-const imprimir = async (flujoSemanal) => {
+const imprimir = async (flujoMensual) => {
     const wb = XLSX.utils.book_new();
-    const nombreArchivo = `FLUJO DE SEMANA ${sociedadSeleccionada.value} ${mes.value}`;
+    const nombreArchivo = `FLUJO MENSUAL ${sociedadSeleccionada.value} ${mes.value}`;
 
     //Elimina sociedad y semana de los flujoSemanal
-    flujoSemanal.forEach((flujo) => {
+    flujoMensual.forEach((flujo) => {
         delete flujo.sociedad;
         delete flujo.semana;
     });
-    const ws = XLSX.utils.json_to_sheet(flujoSemanal);
+    const ws = XLSX.utils.json_to_sheet(flujoMensual);
 
     // eslint-disable-next-line no-unused-vars
-    ws['!cols'] = flujoSemanal.map((x) => ({ wpx: 200 }));
+    ws['!cols'] = flujoMensual.map((x) => ({ wpx: 200 }));
 
-    const nombreHoja = mes.value.replace(/\//g, '-');
+    const nombreHoja = 'FlujoMensual';
     XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
 
     XLSX.writeFile(wb, `${nombreArchivo}.xlsx`);

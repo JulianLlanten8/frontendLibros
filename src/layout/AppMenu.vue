@@ -54,7 +54,18 @@ const model = ref([
                 to: '/inicio/subirArchivos'
             }
         ]
-    } /* ,
+    },
+    {
+        label: 'Administraciobn del sistema',
+        items: [
+            {
+                label: 'Administracion de usuarios',
+                icon: 'pi pi-fw pi-users',
+                to: '/inicio/usuarios'
+            }
+        ]
+    }
+    /* ,
     {
         label: 'Envio de correos electronicos',
         items: [{ label: 'Correos', icon: 'pi pi-fw pi-envelope', to: '/correos' }]

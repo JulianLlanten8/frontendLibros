@@ -29,9 +29,9 @@ const router = createRouter({
             beforeEnter: [guardsRoute],
             children: [
                 {
-                    path: '/inicio/dashboard',
-                    name: 'dashboard',
-                    component: () => import('@/views/Dashboard.vue')
+                    path: '/inicio/usuarios',
+                    name: 'usuarios',
+                    component: () => import('@/views/pages/planeacion/AdministracionUsuarios.vue')
                 },
                 {
                     path: '/inicio/subirArchivos',

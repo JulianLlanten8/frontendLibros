@@ -5,7 +5,7 @@
                 <p class="block text-500 font-medium mb-1">
                     {{ estadistica.descripcion }}
                 </p>
-                <p class="text-500 mb-0">Saldo esperado</p>
+                <p class="text-500 mb-0">Esperado</p>
                 <p class="text-900 font-medium text-xl">{{ $formatoMonedaCOP(estadistica.esperado) }}</p>
             </div>
             <div
@@ -15,7 +15,7 @@
                 <i class="pi pi-dollar text-orange-500 text-xl"></i>
             </div>
             <div>
-                <p class="text-500 mb-0">Saldo ejecutado</p>
+                <p class="text-500 mb-0">Ejecutado</p>
                 <p class="text-900 font-medium text-xl">{{ $formatoMonedaCOP(estadistica.ejecutado) }}</p>
             </div>
         </div>
