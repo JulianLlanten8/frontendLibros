@@ -56,7 +56,7 @@ const model = ref([
         ]
     },
     {
-        label: 'Administraciobn del sistema',
+        label: 'Administración del sistema',
         items: [
             {
                 label: 'Administracion de usuarios',

@@ -7,14 +7,14 @@
                     <template v-slot:start>
                         <div class="my-2">
                             <Button
-                                label="Crear Usuario"
+                                label="Crear usuario"
                                 icon="pi pi-plus"
                                 class="p-button-success mr-2"
-                                @click="openNew"
+                                @click="nuevoUsuario"
                             />
                             <Button
-                                label="Eliminar Usuario"
-                                icon="pi pi-trash"
+                                label="Desactivar usuario"
+                                icon="pi pi-times-circle"
                                 class="p-button-danger"
                                 @click="confirmDeleteSelected"
                                 :disabled="!usuariosSeleccionados || !usuariosSeleccionados.length"
@@ -31,16 +31,17 @@
                     v-model:selection="usuariosSeleccionados"
                     dataKey="id"
                     :paginator="true"
-                    :rows="10"
+                    :rows="5"
                     :filters="filters"
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[5, 10, 25]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                    :rowsPerPageOptions="[3, 5, 25]"
+                    currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} usuarios"
                     responsiveLayout="scroll"
+                    :loading="cargaTablaUsuarios"
                 >
                     <template #header>
                         <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-                            <h5 class="m-0">Administracion de usuarios</h5>
+                            <h5 class="m-0">Administración de usuarios</h5>
                             <span class="block mt-2 md:mt-0 p-input-icon-left">
                                 <i class="pi pi-search" />
                                 <InputText v-model="filters['global'].value" placeholder="Buscar..." />
@@ -48,21 +49,32 @@
                         </div>
                     </template>
 
-                    <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
-                    <Column field="name" header="Nombre"></Column>
+                    <Column selectionMode="single" headerStyle="width: 3rem"></Column>
+                    <Column field="name" header="Nombre" :sortable="true"></Column>
                     <Column field="email" header="Correo electronico"></Column>
                     <Column header="Roles">
                         <template #body="slotProps">
-                            <Chip v-for="role in slotProps.data.roles" :key="role.id"> {{ role.name }} </Chip>
+                            <Chip v-for="role in slotProps.data.roles" :key="role.id" class="m-1">
+                                {{ role.name }}
+                            </Chip>
                         </template>
                     </Column>
                     <Column field="active" header="Estado" :sortable="true" headerStyle="width:14%; min-width:10rem;">
                         <template #body="slotProps">
                             <Badge
-                                :severity="!slotProps.active ? 'success' : 'danger'"
-                                :value="!slotProps.active ? 'Activo' : 'Inactivo'"
-                                size="large"
+                                :severity="slotProps.data.active ? 'success' : 'danger'"
+                                :value="slotProps.data.active ? 'Activo' : 'Inactivo'"
+                                size="small"
                                 icon="pi pi-verified"
+                            />
+                        </template>
+                    </Column>
+                    <Column headerStyle="width:5%; min-width:5rem;">
+                        <template #body="slotProps">
+                            <Button
+                                icon="pi pi-pencil"
+                                class="p-button-rounded p-button-success p-mr-2"
+                                @click="editarUsuario(slotProps.data)"
                             />
                         </template>
                     </Column>
@@ -82,10 +94,10 @@
                             v-model.trim="usuario.name"
                             required="true"
                             autofocus
-                            :class="{ 'p-invalid': submitted && !usuario.name }"
+                            :class="{ 'p-invalid': enviado && !usuario.name }"
                             placeholder="Pepito Perez"
                         />
-                        <small class="p-invalid" v-if="submitted && !usuario.name">Name is required.</small>
+                        <small class="p-invalid" v-if="enviado && !usuario.name">Name is required.</small>
                     </div>
                     <div class="field">
                         <label for="email">Correo Electronico *</label>
@@ -93,7 +105,7 @@
                             id="email"
                             v-model.trim="usuario.email"
                             required="true"
-                            :class="{ 'p-invalid': submitted && !usuario.description }"
+                            :class="{ 'p-invalid': enviado && !usuario.email }"
                             placeholder="pepitoPerez@unico.com.co"
                         />
                     </div>
@@ -102,7 +114,7 @@
                         <Password
                             id="contrasena"
                             v-model.trim="usuario.password"
-                            :class="{ 'p-invalid': submitted && !usuario.description }"
+                            :class="{ 'p-invalid': enviado && !usuario.password }"
                             toggleMask
                             placeholder="contraseña"
                         />
@@ -112,7 +124,7 @@
                         <Password
                             id="confirmar"
                             v-model.trim="usuario.password_confirmation"
-                            :class="{ 'p-invalid': submitted && !usuario.description }"
+                            :class="{ 'p-invalid': enviado && !usuario.password_confirmation }"
                             toggleMask
                             placeholder="Confirmar contraseña"
                         />
@@ -120,22 +132,22 @@
 
                     <div class="field">
                         <label for="rol" class="mb-3">Rol *</label>
-                        <Dropdown
+                        <MultiSelect
                             id="rol"
                             v-model="usuario.rol"
                             :options="roles"
                             required="true"
-                            :class="{ 'p-invalid': submitted && !usuario.rol }"
+                            :class="{ 'p-invalid': enviado && !usuario.rol }"
                             optionLabel="name"
                             optionValue="name"
                             placeholder="Seleccione un rol"
                         >
-                        </Dropdown>
+                        </MultiSelect>
                     </div>
 
                     <template #footer>
-                        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
-                        <Button label="Save" icon="pi pi-check" class="p-button-text" @click="guardarUsuario" />
+                        <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
+                        <Button label="Guardar" icon="pi pi-check" class="p-button-text" @click="guardarUsuario" />
                     </template>
                 </Dialog>
 
@@ -166,12 +178,12 @@
                 <Dialog
                     v-model:visible="deleteProductsDialog"
                     :style="{ width: '450px' }"
-                    header="Confirm"
+                    header="Confirmacion desactivado"
                     :modal="true"
                 >
                     <div class="flex align-items-center justify-content-center">
                         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                        <span v-if="usuario">¿Está seguro de que desea eliminar los usuarios seleccionados?</span>
+                        <span v-if="usuario">¿Está seguro de que desea desabilitar los usuarios seleccionados?</span>
                     </div>
                     <template #footer>
                         <Button
@@ -180,7 +192,12 @@
                             class="p-button-text"
                             @click="deleteProductsDialog = false"
                         />
-                        <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteSelectedProducts" />
+                        <Button
+                            label="Yes"
+                            icon="pi pi-check"
+                            class="p-button-text"
+                            @click="desabilitarUsuarioSeleccionado"
+                        />
                     </template>
                 </Dialog>
             </div>
@@ -197,14 +214,16 @@ import { obtenerTodo, crear } from '@/service/clienteHttp';
 const toast = useToast();
 
 const products = ref(null);
+const deleteProductsDialog = ref(false);
+
+const cargaTablaUsuarios = ref(false);
 const userDialogo = ref(false);
 const borraUsuarioDialogo = ref(false);
-const deleteProductsDialog = ref(false);
 const usuario = ref({});
 const usuariosSeleccionados = ref(null);
 const dt = ref(null);
 const filters = ref({});
-const submitted = ref(false);
+const enviado = ref(false);
 
 onBeforeMount(() => {
     initFilters();
@@ -217,8 +236,10 @@ onMounted(() => {
 const Usuarios = ref([]);
 
 const ObtenerUsuarios = async () => {
+    cargaTablaUsuarios.value = true;
     const { data } = await obtenerTodo(`usuarios/obtenerTodos`);
     Usuarios.value = data;
+    cargaTablaUsuarios.value = false;
 };
 
 const roles = ref([]);
@@ -228,20 +249,21 @@ const ObtenerRoles = async () => {
     roles.value = rolesObtenidos.roles;
 };
 
-const openNew = () => {
+const nuevoUsuario = () => {
     usuario.value = {};
-    submitted.value = false;
+    enviado.value = false;
     userDialogo.value = true;
 };
 
 const hideDialog = () => {
     userDialogo.value = false;
-    submitted.value = false;
+    enviado.value = false;
 };
 
 const guardarUsuario = async () => {
-    submitted.value = true;
-    if (usuario.value) {
+    enviado.value = true;
+    if (usuario.value && !usuario.value.id) {
+        // crea
         await crear(`/auth/signup`, usuario.value, 'application/json') // aqui se envia el usuario
             .then((response) => {
                 if (response.status === 201) {
@@ -249,9 +271,44 @@ const guardarUsuario = async () => {
                     toast.add({
                         severity: 'success',
                         summary: 'Usuario Creado',
-                        detail: 'Usuario Creado',
+                        detail: `Usuario ${response.data.data.name} creado`,
                         life: 3000
                     });
+                    ObtenerUsuarios();
+                    userDialogo.value = false;
+                }
+                if (response.status === 422) {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error al crear el usuario',
+                        detail: `${response.data.message}`,
+                        life: 3000
+                    });
+                }
+            })
+            .catch((error) => {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error al crear el usuario',
+                    detail: `${error}`,
+                    life: 3000
+                });
+            });
+    } else {
+        //edita
+        console.log(usuario.value);
+        await crear(`usuario/editar`, usuario.value, 'application/json')
+            .then((response) => {
+                if (response.status === 200) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Usuario Editado',
+                        detail: `Usuario ${response.data.data.name} editado`,
+                        life: 3000
+                    });
+                    if (usuario.value.rol) {
+                        asignarRol(response.data.data.id, usuario.value.rol);
+                    }
                     ObtenerUsuarios();
                     userDialogo.value = false;
                 }
@@ -259,7 +316,7 @@ const guardarUsuario = async () => {
             .catch((error) => {
                 toast.add({
                     severity: 'error',
-                    summary: 'Error al crear el usuario',
+                    summary: 'Error al editar el usuario',
                     detail: `${error}`,
                     life: 3000
                 });
@@ -291,7 +348,7 @@ const asignarRol = async (id, rol) => {
         });
 };
 
-const editProduct = (editProduct) => {
+const editarUsuario = (editProduct) => {
     usuario.value = { ...editProduct };
     console.log(usuario);
     userDialogo.value = true;
@@ -312,7 +369,7 @@ const deleteProduct = () => {
 const confirmDeleteSelected = () => {
     deleteProductsDialog.value = true;
 };
-const deleteSelectedProducts = () => {
+const desabilitarUsuarioSeleccionado = () => {
     products.value = products.value.filter((val) => !usuariosSeleccionados.value.includes(val));
     deleteProductsDialog.value = false;
     usuariosSeleccionados.value = null;
