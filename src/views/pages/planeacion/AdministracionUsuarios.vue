@@ -83,34 +83,55 @@
                 <Dialog
                     v-model:visible="userDialogo"
                     :style="{ width: '450px' }"
-                    header="Creación de usuario"
+                    :header="usuario?.id ? 'Editar usuario' : 'Crear usuario'"
                     :modal="true"
                     class="p-fluid"
                 >
                     <div class="field">
-                        <label for="name">Nombre Completo *</label>
+                        <label for="name" :class="{ 'p-error font-semibold': enviado && v$.name.$invalid }"
+                            >Nombre Completo <span class="text-red-500">*</span></label
+                        >
                         <InputText
                             id="nombre"
                             v-model.trim="usuario.name"
                             required="true"
                             autofocus
-                            :class="{ 'p-invalid': enviado && !usuario.name }"
+                            :class="{ 'p-invalid': enviado && v$.name.$invalid }"
                             placeholder="Pepito Perez"
                         />
-                        <small class="p-invalid" v-if="enviado && !usuario.name">Name is required.</small>
+                        <small v-if="enviado && v$.name.$invalid" class="p-error text-xs">
+                            {{ v$.name.required.$message }}
+                        </small>
                     </div>
-                    <div class="field">
-                        <label for="email">Correo Electronico *</label>
+                    <div class="field" :class="{ 'p-error font-semibold': enviado && v$.email.$invalid }">
+                        <label for="email">Correo Electronico <span class="text-red-500">*</span></label>
                         <InputText
                             id="email"
                             v-model.trim="usuario.email"
                             required="true"
-                            :class="{ 'p-invalid': enviado && !usuario.email }"
+                            :class="{ 'p-invalid': enviado && v$.email.$invalid }"
                             placeholder="pepitoPerez@unico.com.co"
                         />
+                        <!-- small con el error -->
+                        <small v-if="enviado && v$.email.$invalid" class="p-error text-xs">
+                            {{ v$.email.email.$message }}
+                        </small>
                     </div>
                     <div class="field">
-                        <label for="contrasena">Contraseña *</label>
+                        <label for="phone">Celular </label>
+                        <InputMask
+                            id="phone"
+                            v-model.trim="usuario.phone"
+                            placeholder="(57) 300-000-00-00"
+                            mask="(99) 999-999-99-99"
+                        />
+                    </div>
+                    <div
+                        v-if="!usuario?.id"
+                        class="field"
+                        :class="{ 'p-error font-semibold': enviado && v$.password.$invalid }"
+                    >
+                        <label for="contrasena">Contraseña <span class="text-red-500">*</span></label>
                         <Password
                             id="contrasena"
                             v-model.trim="usuario.password"
@@ -118,26 +139,36 @@
                             toggleMask
                             placeholder="contraseña"
                         />
+                        <small v-if="enviado && v$.password.$invalid" class="p-error text-xs">
+                            {{ v$.password.required.$message }}
+                        </small>
                     </div>
-                    <div class="field">
-                        <label for="confirmar">Confirmar contraseña *</label>
+                    <div
+                        v-if="!usuario?.id"
+                        class="field"
+                        :class="{ 'p-error font-semibold': enviado && v$.password_confirmation.$invalid }"
+                    >
+                        <label for="confirmar">Confirmar contraseña <span class="text-red-500">*</span></label>
                         <Password
                             id="confirmar"
                             v-model.trim="usuario.password_confirmation"
-                            :class="{ 'p-invalid': enviado && !usuario.password_confirmation }"
+                            :class="{ 'p-invalid': enviado && v$.password_confirmation.$invalid }"
                             toggleMask
                             placeholder="Confirmar contraseña"
                         />
+                        <small v-if="enviado && v$.password_confirmation.$invalid" class="p-error text-xs">
+                            {{ v$.password_confirmation.sameAsPassword.$message }}
+                        </small>
                     </div>
 
-                    <div class="field">
-                        <label for="rol" class="mb-3">Rol *</label>
+                    <div class="field" :class="{ 'p-error font-semibold': enviado && v$.rol.$invalid }">
+                        <label for="rol" class="mb-3">Rol<span class="text-red-500">*</span></label>
                         <MultiSelect
                             id="rol"
                             v-model="usuario.rol"
                             :options="roles"
                             required="true"
-                            :class="{ 'p-invalid': enviado && !usuario.rol }"
+                            :class="{ 'p-invalid': enviado && v$.rol.$invalid }"
                             optionLabel="name"
                             optionValue="name"
                             placeholder="Seleccione un rol"
@@ -147,7 +178,12 @@
 
                     <template #footer>
                         <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
-                        <Button label="Guardar" icon="pi pi-check" class="p-button-text" @click="guardarUsuario" />
+                        <Button
+                            label="Guardar"
+                            icon="pi pi-check"
+                            class="p-button-text"
+                            @click="guardarUsuario(!v$.$invalid)"
+                        />
                     </template>
                 </Dialog>
 
@@ -207,15 +243,15 @@
 
 <script setup>
 import { FilterMatchMode } from 'primevue/api';
-import { ref, onMounted, onBeforeMount } from 'vue';
+import { ref, onMounted, onBeforeMount, computed } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { obtenerTodo, crear } from '@/service/clienteHttp';
+import { useVuelidate } from '@vuelidate/core';
+import { required, email, sameAs, helpers } from '@vuelidate/validators';
 
 const toast = useToast();
-
 const products = ref(null);
 const deleteProductsDialog = ref(false);
-
 const cargaTablaUsuarios = ref(false);
 const userDialogo = ref(false);
 const borraUsuarioDialogo = ref(false);
@@ -224,16 +260,33 @@ const usuariosSeleccionados = ref(null);
 const dt = ref(null);
 const filters = ref({});
 const enviado = ref(false);
+const Usuarios = ref([]);
+const roles = ref([]);
 
+const reglas = computed(() => {
+    return {
+        name: { required: helpers.withMessage('El nombre es requerido', required) },
+        email: {
+            required: helpers.withMessage('El email es requerido', required),
+            email: helpers.withMessage('El valor no es una dirección de correo electrónico válida', email)
+        },
+        password: { required: helpers.withMessage('La contraseña es requerida', required) },
+        password_confirmation: {
+            sameAsPassword: helpers.withMessage('Las contraseñas no coinciden', sameAs(usuario.value.password))
+        },
+        rol: { required: helpers.withMessage('El rol es requerido', required) }
+    };
+});
+
+const { v$ } = useVuelidate(reglas, usuario);
 onBeforeMount(() => {
     initFilters();
 });
+
 onMounted(() => {
     ObtenerUsuarios();
     ObtenerRoles();
 });
-
-const Usuarios = ref([]);
 
 const ObtenerUsuarios = async () => {
     cargaTablaUsuarios.value = true;
@@ -241,8 +294,6 @@ const ObtenerUsuarios = async () => {
     Usuarios.value = data;
     cargaTablaUsuarios.value = false;
 };
-
-const roles = ref([]);
 
 const ObtenerRoles = async () => {
     const rolesObtenidos = await obtenerTodo(`roles/obtener`);
@@ -260,10 +311,13 @@ const hideDialog = () => {
     enviado.value = false;
 };
 
-const guardarUsuario = async () => {
+const guardarUsuario = async (isFormValid) => {
     enviado.value = true;
     if (usuario.value && !usuario.value.id) {
         // crea
+        if (!isFormValid) {
+            return;
+        }
         await crear(`/auth/signup`, usuario.value, 'application/json') // aqui se envia el usuario
             .then((response) => {
                 if (response.status === 201) {
@@ -350,13 +404,7 @@ const asignarRol = async (id, rol) => {
 
 const editarUsuario = (editProduct) => {
     usuario.value = { ...editProduct };
-    console.log(usuario);
     userDialogo.value = true;
-};
-
-const confirmDeleteProduct = (editProduct) => {
-    usuario.value = editProduct;
-    borraUsuarioDialogo.value = true;
 };
 
 const deleteProduct = () => {

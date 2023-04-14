@@ -1,19 +1,22 @@
 <template>
     <main class="grid m-1 flex justify-content-center">
-        <Toast />
-        <Toolbar class="col-12 mb-4">
-            <template #start>
-                <Dropdown
-                    id="tipo"
-                    v-model="tipo"
-                    :options="tipos"
-                    placeholder="Seleccione que tipo de saldo desea ingresar"
-                    class="my-3 w-28rem"
-                    :showClear="true"
-                    @change="validarSemanaChange(null)"
-                />
-            </template>
-        </Toolbar>
+        <article class="col-12 card">
+            <h4>Ingreso de saldos</h4>
+            <Toast />
+            <Toolbar class="col-12">
+                <template #start>
+                    <Dropdown
+                        id="tipo"
+                        v-model="tipo"
+                        :options="tipos"
+                        placeholder="Seleccione que tipo de saldo desea ingresar"
+                        class="my-3 w-28rem"
+                        :showClear="true"
+                        @change="validarSemanaChange(null)"
+                    />
+                </template>
+            </Toolbar>
+        </article>
         <Card v-if="tipo === 'Saldos bancarios'" class="col-12">
             <template #title>
                 <h5 class="text-2xl">Ingresar saldos bancarios</h5>

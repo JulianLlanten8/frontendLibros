@@ -16,11 +16,11 @@
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
             <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
                 <i class="pi pi-user"></i>
-                <span>Profile</span>
+                <span>Perfil</span>
             </button>
             <button @click="onSettingsClick()" class="p-link layout-topbar-button">
-                <i class="pi pi-fw pi-power-off"></i>
-                <span>Settings</span>
+                <i class="pi pi-fw pi-power-off text-red-500"></i>
+                <span>Cerrar Sessión</span>
             </button>
         </div>
     </div>

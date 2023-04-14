@@ -4,7 +4,7 @@
         <div class="col-12">
             <Card>
                 <template #title>
-                    <h5>Subir archivos</h5>
+                    <h4>Subir archivos</h4>
                 </template>
                 <template #content>
                     <div class="flex flex-column md:flex-row gap-3">
