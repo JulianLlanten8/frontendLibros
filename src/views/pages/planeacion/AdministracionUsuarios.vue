@@ -51,7 +51,13 @@
                             </Chip>
                         </template>
                     </Column>
-                    <Column field="active" header="Estado" :sortable="true" headerStyle="width:14%; min-width:10rem;">
+                    <Column
+                        field="active"
+                        header="Estado"
+                        class="p-cursor-pointer"
+                        :sortable="true"
+                        headerStyle="width:14%; min-width:10rem;"
+                    >
                         <template #body="slotProps">
                             <Badge
                                 :severity="slotProps.data.active ? 'success' : 'danger'"
@@ -59,7 +65,7 @@
                                 size="small"
                                 icon="pi pi-verified"
                                 @click="confirmacionCambiarEstado(slotProps.data)"
-                                class="p-cursor-pointer"
+                                style="cursor: pointer"
                             />
                         </template>
                     </Column>
@@ -189,10 +195,13 @@
                 >
                     <div class="flex align-items-center justify-content-center">
                         <i class="pi pi-exclamation-triangle mr-3 text-red-400" style="font-size: 2rem" />
-                        <span v-if="usuario">
+                        <p v-if="usuario">
                             ¿Está seguro de que desea
-                            {{ usuarioparaDesactivar.active ? 'Activar' : 'Desactivar' }} el usuario seleccionado?
-                        </span>
+                            <span class="text-primary">{{
+                                usuarioparaDesactivar.active ? 'desactivar' : 'activar'
+                            }}</span>
+                            el usuario seleccionado?
+                        </p>
                     </div>
                     <template #footer>
                         <Button label="No" icon="pi pi-times" class="p-button-text" @click="cambiar = false" />

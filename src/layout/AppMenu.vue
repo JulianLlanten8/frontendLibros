@@ -1,6 +1,6 @@
 <template>
     <ul class="layout-menu">
-        <template v-for="(item, i) in model" :key="item">
+        <template v-for="(item, i) in menuConPermisos" :key="item">
             <app-menu-item v-if="!item.separator" :item="item" :index="i"></app-menu-item>
             <li v-if="item.separator" class="menu-separator"></li>
         </template>
@@ -8,10 +8,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 
 import AppMenuItem from './AppMenuItem.vue';
-
+onMounted(() => {
+    menuConPermisos.value = menubar();
+});
+const menuConPermisos = ref([]);
 const model = ref([
     {
         label: 'Vista de datos',
@@ -24,17 +27,20 @@ const model = ref([
                     {
                         label: 'FC Semanal',
                         icon: 'pi pi-fw pi-file-excel',
-                        to: '/reportes/semanales'
+                        to: '/reportes/semanales',
+                        rol: ['Administrador']
                     },
                     {
                         label: 'FC Semanal Proyectado',
                         icon: 'pi pi-fw pi-file-excel',
-                        to: '/reportes/esperado-semanal-proyectado'
+                        to: '/reportes/esperado-semanal-proyectado',
+                        rol: ['Administrador']
                     },
                     {
                         label: 'FC Mensual',
                         icon: 'pi pi-fw pi-file-excel',
-                        to: '/reportes/mensuales'
+                        to: '/reportes/mensuales',
+                        rol: ['Administrador']
                     }
                 ]
             }
@@ -46,12 +52,14 @@ const model = ref([
             {
                 label: 'Ingresar saldos',
                 icon: 'pi pi-fw pi-wallet',
-                to: '/inicio/saldos'
+                to: '/inicio/saldos',
+                roles: ['Administrador']
             },
             {
                 label: 'Subir archivos',
                 icon: 'pi pi-fw pi-file-import',
-                to: '/inicio/subirArchivos'
+                to: '/inicio/subirArchivos',
+                roles: ['GestionFinanciera']
             }
         ]
     },
@@ -61,7 +69,8 @@ const model = ref([
             {
                 label: 'Administracion de usuarios',
                 icon: 'pi pi-fw pi-users',
-                to: '/inicio/usuarios'
+                to: '/inicio/usuarios',
+                roles: ['Administrador']
             }
         ]
     }
@@ -71,6 +80,20 @@ const model = ref([
         items: [{ label: 'Correos', icon: 'pi pi-fw pi-envelope', to: '/correos' }]
     } */
 ]);
+
+const permisos = ref(JSON.parse(sessionStorage.getItem('USER'))?.permisos?.roles);
+const menubar = () => {
+    if (permisos.value.includes('GestionFinanciera')) {
+        model.value = model.value.filter((items) => items.label === 'Integracion de datos');
+        return model.value.map((item) => {
+            item.items = item.items.filter((item) => item.roles.includes('GestionFinanciera'));
+            return item;
+        });
+    }
+    if (permisos.value.includes('Administrador')) {
+        return model.value;
+    }
+};
 </script>
 
 <style lang="scss" scoped></style>

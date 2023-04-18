@@ -14,10 +14,7 @@
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-user"></i>
-                <span>Perfil</span>
-            </button>
+            <h5 class="m-3 font-italic">{{ user }}</h5>
             <button @click="onSettingsClick()" class="p-link layout-topbar-button">
                 <i class="pi pi-fw pi-power-off text-red-500"></i>
                 <span>Cerrar Sessión</span>
@@ -32,13 +29,14 @@ import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
 import { clearSession } from '@/router/auth-guard';
 const { layoutConfig, onMenuToggle, contextPath } = useLayout();
-
+const user = ref(null);
 const outsideClickListener = ref(null);
 const topbarMenuActive = ref(false);
 const router = useRouter();
 
 onMounted(() => {
     bindOutsideClickListener();
+    user.value = JSON.parse(sessionStorage.getItem('USER'))?.name;
 });
 
 onBeforeUnmount(() => {
