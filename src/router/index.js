@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AppLayout from '@/layout/AppLayout.vue';
-import { guardsRoute, guardsLogin /* checkRole */ } from './auth-guard';
+import { guardsRoute, guardsLogin, checkRole } from './auth-guard';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -31,17 +31,23 @@ const router = createRouter({
                 {
                     path: '/inicio/usuarios',
                     name: 'usuarios',
-                    component: () => import('@/views/pages/planeacion/AdministracionUsuarios.vue')
+                    component: () => import('@/views/pages/planeacion/AdministracionUsuarios.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true }
                 },
                 {
                     path: '/inicio/subirArchivos',
                     name: 'subirArchivos',
-                    component: () => import('@/views/pages/planeacion/SubirArchivos.vue')
+                    component: () => import('@/views/pages/planeacion/SubirArchivos.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true, GestionFinanciera: true }
                 },
                 {
                     path: '/inicio/saldos',
                     name: 'saldos',
-                    component: () => import('@/views/pages/planeacion/Saldos.vue')
+                    component: () => import('@/views/pages/planeacion/Saldos.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true, GestionFinanciera: true }
                 }
             ]
         },
@@ -53,17 +59,23 @@ const router = createRouter({
                 {
                     path: '/reportes/semanales',
                     name: 'semanales',
-                    component: () => import('@/views/pages/planeacion/ReporteSemanal.vue')
+                    component: () => import('@/views/pages/planeacion/ReporteSemanal.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true, GestionFinanciera: true }
                 },
                 {
                     path: '/reportes/mensuales',
                     name: 'mensuales',
-                    component: () => import('@/views/pages/planeacion/ReporteMensual.vue')
+                    component: () => import('@/views/pages/planeacion/ReporteMensual.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true }
                 },
                 {
                     path: '/reportes/esperado-semanal-proyectado',
                     name: 'esperado-semanal-proyectado',
-                    component: () => import('@/views/pages/planeacion/FlujoSemanalProyectado.vue')
+                    component: () => import('@/views/pages/planeacion/FlujoSemanalProyectado.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true }
                 }
             ]
         },

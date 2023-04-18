@@ -34,12 +34,20 @@ const guardsLogin = (to, from, next) => {
 };
 
 const checkRole = (to, from, next) => {
-    const user = JSON.parse(sessionStorage.getItem('user'));
-    if (user) {
-        if (user.role === 'admin') {
+    const USER = JSON.parse(sessionStorage.getItem('USER'));
+    if (USER) {
+        const ROLES = USER.permisos.roles;
+        const ROLES_META = to.meta;
+        let hasRole = false;
+        for (const key in ROLES_META) {
+            if (ROLES_META[key]) {
+                if (ROLES.includes(key)) {
+                    hasRole = true;
+                }
+            }
+        }
+        if (hasRole) {
             next();
-        } else {
-            next({ name: 'semanales' });
         }
     } else {
         next({ name: 'login' });

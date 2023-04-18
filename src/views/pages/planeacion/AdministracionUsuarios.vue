@@ -12,13 +12,6 @@
                                 class="p-button-success mr-2"
                                 @click="nuevoUsuario"
                             />
-                            <Button
-                                label="Desactivar usuario"
-                                icon="pi pi-times-circle"
-                                class="p-button-danger"
-                                @click="confirmDeleteSelected"
-                                :disabled="!usuariosSeleccionados || !usuariosSeleccionados.length"
-                            />
                         </div>
                     </template>
 
@@ -27,7 +20,7 @@
 
                 <DataTable
                     ref="dt"
-                    :value="Usuarios"
+                    :value="usuarios"
                     v-model:selection="usuariosSeleccionados"
                     dataKey="id"
                     :paginator="true"
@@ -49,7 +42,6 @@
                         </div>
                     </template>
 
-                    <Column selectionMode="single" headerStyle="width: 3rem"></Column>
                     <Column field="name" header="Nombre" :sortable="true"></Column>
                     <Column field="email" header="Correo electronico"></Column>
                     <Column header="Roles">
@@ -66,6 +58,8 @@
                                 :value="slotProps.data.active ? 'Activo' : 'Inactivo'"
                                 size="small"
                                 icon="pi pi-verified"
+                                @click="confirmacionCambiarEstado(slotProps.data)"
+                                class="p-cursor-pointer"
                             />
                         </template>
                     </Column>
@@ -188,51 +182,25 @@
                 </Dialog>
 
                 <Dialog
-                    v-model:visible="borraUsuarioDialogo"
-                    :style="{ width: '450px' }"
-                    header="Confirm"
-                    :modal="true"
-                >
-                    <div class="flex align-items-center justify-content-center">
-                        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                        <span v-if="usuario"
-                            >¿Estás seguro de que quieres borrar el usuario <b>{{ usuario.name }}</b
-                            >?</span
-                        >
-                    </div>
-                    <template #footer>
-                        <Button
-                            label="No"
-                            icon="pi pi-times"
-                            class="p-button-text"
-                            @click="borraUsuarioDialogo = false"
-                        />
-                        <Button label="Yes" icon="pi pi-check" class="p-button-text" @click="deleteProduct" />
-                    </template>
-                </Dialog>
-
-                <Dialog
-                    v-model:visible="deleteProductsDialog"
+                    v-model:visible="cambiar"
                     :style="{ width: '450px' }"
                     header="Confirmacion desactivado"
                     :modal="true"
                 >
                     <div class="flex align-items-center justify-content-center">
-                        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem" />
-                        <span v-if="usuario">¿Está seguro de que desea desabilitar los usuarios seleccionados?</span>
+                        <i class="pi pi-exclamation-triangle mr-3 text-red-400" style="font-size: 2rem" />
+                        <span v-if="usuario">
+                            ¿Está seguro de que desea
+                            {{ usuarioparaDesactivar.active ? 'Activar' : 'Desactivar' }} el usuario seleccionado?
+                        </span>
                     </div>
                     <template #footer>
+                        <Button label="No" icon="pi pi-times" class="p-button-text" @click="cambiar = false" />
                         <Button
-                            label="No"
-                            icon="pi pi-times"
-                            class="p-button-text"
-                            @click="deleteProductsDialog = false"
-                        />
-                        <Button
-                            label="Yes"
+                            label="Si"
                             icon="pi pi-check"
-                            class="p-button-text"
-                            @click="desabilitarUsuarioSeleccionado"
+                            class="p-button-text text-red-400"
+                            @click="cambiarEstadoUsuario"
                         />
                     </template>
                 </Dialog>
@@ -250,17 +218,16 @@ import { useVuelidate } from '@vuelidate/core';
 import { required, email, sameAs, helpers } from '@vuelidate/validators';
 
 const toast = useToast();
-const products = ref(null);
-const deleteProductsDialog = ref(false);
+const cambiar = ref(false);
 const cargaTablaUsuarios = ref(false);
 const userDialogo = ref(false);
-const borraUsuarioDialogo = ref(false);
+const usuarioparaDesactivar = ref(null);
 const usuario = ref({});
 const usuariosSeleccionados = ref(null);
 const dt = ref(null);
 const filters = ref({});
 const enviado = ref(false);
-const Usuarios = ref([]);
+const usuarios = ref([]);
 const roles = ref([]);
 
 const reglas = computed(() => {
@@ -278,7 +245,7 @@ const reglas = computed(() => {
     };
 });
 
-const { v$ } = useVuelidate(reglas, usuario);
+const v$ = useVuelidate(reglas, usuario);
 onBeforeMount(() => {
     initFilters();
 });
@@ -291,7 +258,7 @@ onMounted(() => {
 const ObtenerUsuarios = async () => {
     cargaTablaUsuarios.value = true;
     const { data } = await obtenerTodo(`usuarios/obtenerTodos`);
-    Usuarios.value = data;
+    usuarios.value = data;
     cargaTablaUsuarios.value = false;
 };
 
@@ -407,21 +374,41 @@ const editarUsuario = (editProduct) => {
     userDialogo.value = true;
 };
 
-const deleteProduct = () => {
-    products.value = products.value.filter((val) => val.id !== usuario.value.id);
-    borraUsuarioDialogo.value = false;
-    usuario.value = {};
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+const cambiarEstadoUsuario = () => {
+    const usuario = usuarioparaDesactivar.value;
+    console.log(usuario);
+    if (usuario) {
+        crear(`usuario/cambiarEstadoUsuario`, usuario, 'application/json')
+            .then((response) => {
+                if (response.status === 200) {
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Usuario Editado',
+                        detail: `Usuario ${response.data.data.name} 
+                                ${response.data.data.estado ? 'Activado' : 'Desactivado'} `,
+                        life: 3000
+                    });
+                    ObtenerUsuarios();
+                    userDialogo.value = false;
+                }
+            })
+            .catch((error) => {
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error al editar el usuario',
+                    detail: `${error}`,
+                    life: 3000
+                });
+            })
+            .finally(() => {
+                cambiar.value = false;
+            });
+    }
 };
 
-const confirmDeleteSelected = () => {
-    deleteProductsDialog.value = true;
-};
-const desabilitarUsuarioSeleccionado = () => {
-    products.value = products.value.filter((val) => !usuariosSeleccionados.value.includes(val));
-    deleteProductsDialog.value = false;
-    usuariosSeleccionados.value = null;
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+const confirmacionCambiarEstado = (usuario) => {
+    cambiar.value = true;
+    usuarioparaDesactivar.value = usuario;
 };
 
 const initFilters = () => {

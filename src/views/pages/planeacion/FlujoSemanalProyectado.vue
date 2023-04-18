@@ -31,7 +31,7 @@
                                 placeholder="Seleccione una semana"
                                 class="my-3 w-full"
                                 :showClear="true"
-                                @change="ObtenerFlujosProyectados(sociedadSeleccionada, semana)"
+                                @change="ObtenerFlujosProyectados()"
                             />
                         </div>
                     </template>
@@ -52,7 +52,7 @@
             </template>
         </Card>
     </main>
-    <Card v-if="flujo_caja" class="mt-3">
+    <Card v-if="!cargandoFlujo && flujo_caja && sociedadSeleccionada && semana && flujo_caja?.esperado" class="mt-3">
         <template #title>
             <h3 class="text-center text-green-500">{{ flujo_caja.sociedad }}</h3>
             <h3 class="text-2xl">{{ flujo_caja.descripcion }}</h3>
@@ -62,6 +62,12 @@
             <h3>{{ $formatoMonedaCOP(flujo_caja?.esperado) }}</h3>
         </template>
     </Card>
+    <div v-if="cargandoFlujo" class="border-round border-1 surface-border p-4 surface-card mt-2">
+        <div class="flex justify-content-center m-3">
+            <Skeleton width="25rem" height="3rem"></Skeleton>
+        </div>
+        <Skeleton width="100%" height="11rem"></Skeleton>
+    </div>
     <!-- <table v-if="flujoSemanalProyectado">
         <tr>
             <th>Concepto</th>
@@ -124,7 +130,7 @@ const cargandoSociedades = ref(false);
 
 const cargandoSemanas = ref(false);
 
-const cargandoTabla = ref(false);
+const cargandoFlujo = ref(false);
 const proyectado = ref([]);
 
 const flujo_caja = ref([]);
@@ -142,16 +148,16 @@ onMounted(() => {
     }
 }; */
 
-const ObtenerFlujosProyectados = (sociedad, fecha) => {
-    cargandoTabla.value = true;
-    fecha = fecha.replace(/\//g, '.');
-    obtenerTodo(`esperado/obtenerTodo/${sociedad}/${fecha}`)
+const ObtenerFlujosProyectados = () => {
+    cargandoFlujo.value = true;
+    let fecha = semana.value;
+    let sociedad = sociedadSeleccionada.value;
+    let fechaFormateada = fecha.replaceAll('/', '.');
+    obtenerTodo(`esperado/obtenerTodo/${sociedad}/${fechaFormateada}`)
         .then((res) => {
             flujoSemanalProyectado.value = res;
-            console.log(res);
             flujo_caja.value = res.at(-1);
             flujo_caja.value = flujo_caja.value.at(-2);
-            // console.log(flujoSemanalProyectado.value[0]);
             let general = {};
             let concepto = [];
             let descripcion = [];
@@ -189,7 +195,6 @@ const ObtenerFlujosProyectados = (sociedad, fecha) => {
                 };
                 pro.push(`%${cumplimiento()}`);
             }
-            // console.log(pro);
             proyectado.value = pro;
             cabecerasfor.value = cabeceras;
 
@@ -209,7 +214,7 @@ const ObtenerFlujosProyectados = (sociedad, fecha) => {
             });
         })
         .finally(() => {
-            cargandoTabla.value = false;
+            cargandoFlujo.value = false;
         });
 };
 
@@ -233,8 +238,8 @@ const obtenerSemanas = async (sociedad) => {
 };
 
 const filtroSociedades = (sociedad) => {
-    if (semanas.value.length > 0) {
-        ObtenerFlujosProyectados(sociedadSeleccionada.value, semana.value.name);
+    if (semanas.value.length > 0 && sociedadSeleccionada.value !== null && semana.value !== null) {
+        ObtenerFlujosProyectados();
     } else {
         obtenerSemanas(sociedad);
     }

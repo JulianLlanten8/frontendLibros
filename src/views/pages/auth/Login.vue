@@ -145,7 +145,6 @@ const iniciarSesion = async (isFormValid) => {
                 sessionStorage.setItem('token', res.access_token);
                 sessionStorage.setItem('token_type', res.token_type);
                 obtenerDatosUsuario();
-                router.push('/reportes/semanales');
             }
             if (res?.status === 401) {
                 error.value = res.data.message;
@@ -163,6 +162,7 @@ const obtenerDatosUsuario = async () => {
     if (sessionStorage.getItem('token')) {
         await obtenerTodo('usuario/obtenerDatosUsuario').then((response) => {
             sessionStorage.setItem('USER', JSON.stringify(response.user));
+            router.push('/reportes/semanales');
             return response;
         });
     }
