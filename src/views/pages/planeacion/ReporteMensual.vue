@@ -98,6 +98,7 @@
             <template #footer></template>
         </DataTable>
     </main>
+    <ScrollTop />
 </template>
 
 <script setup>

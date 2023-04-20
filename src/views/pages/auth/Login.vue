@@ -27,36 +27,26 @@
                     </div>
 
                     <div class="field">
-                        <div class="m-0 p-0">
-                            <label
-                                for="email"
-                                class="block text-900 text-xl font-medium mb-2"
-                                :class="{ 'p-error': (v$.email.$invalid && submitted) || error }"
-                            >
-                                Correo electrónico
-                                <span class="text-red-500">*</span>
-                            </label>
-                            <InputText
-                                id="email"
-                                type="text"
-                                placeholder="Correo electrónico"
-                                class="w-full md:w-30rem"
-                                :class="{ 'p-invalid': (v$.email.$invalid && submitted) || error }"
-                                style="padding: 1rem"
-                                v-model="v$.email.$model"
-                            />
-                        </div>
-                        <span v-if="(v$.email.$error && submitted) || error">
-                            <span id="email-error" v-for="(error, index) of v$.email.$errors" :key="index">
-                                <small class="p-error">{{ error.$message }}</small>
-                            </span>
-                        </span>
-                        <small
-                            v-else-if="(v$.email.$invalid && submitted) || error || v$.email.$pending.$response"
-                            class="p-error"
+                        <label
+                            for="email"
+                            class="block text-900 text-xl font-medium mb-2"
+                            :class="{ 'p-error': (v$.email.$invalid && submitted) || error }"
                         >
-                            {{ v$.email.required.$message.replace('Value', 'Email') }}
-                        </small>
+                            Correo electrónico
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <InputText
+                            id="email"
+                            type="text"
+                            placeholder="Correo electrónico"
+                            class="w-full md:w-30rem"
+                            :class="{ 'p-invalid': v$.email.$invalid || error }"
+                            style="padding: 1rem"
+                            v-model="login.email"
+                        />
+                        <p id="text-error" class="p-error text-sm mt-1" v-if="v$.email.$invalid">
+                            {{ v$.email.email.$message }}
+                        </p>
                     </div>
 
                     <div class="field">
@@ -69,7 +59,7 @@
                         </label>
                         <Password
                             id="password"
-                            v-model="v$.password.$model"
+                            v-model="login.password"
                             placeholder="Contraseña"
                             class="w-full"
                             :feedback="false"
@@ -79,12 +69,9 @@
                             toggleMask
                         >
                         </Password>
-                        <small v-if="v$.password.$invalid && submitted" class="p-error">
-                            <!-- imprime el mensaje generado por -->
-                            {{ v$.password.$errors[0].$message }}
-                            <!-- {{ v$.password.$invalid && submitted ? 'La contraseña es requerida' : '' }}
-                            {{ error? error: '' }} -->
-                        </small>
+                        <p id="text-error" class="p-error text-sm mt-1" v-if="v$.password.$invalid">
+                            {{ v$.password.required.$message }}
+                        </p>
                     </div>
 
                     <div class="flex align-items-center justify-content-between mb-5 gap-5">
@@ -118,21 +105,27 @@ import { reactive, ref, computed } from 'vue';
 import AppConfig from '@/layout/AppConfig.vue';
 import router from '@/router';
 import { useVuelidate } from '@vuelidate/core';
-import { required, email } from '@vuelidate/validators';
+import { required, email, helpers } from '@vuelidate/validators';
 import { enviarDatos, obtenerTodo } from '@/service/clienteHttp';
+import { useToast } from 'primevue/usetoast';
+
+const toast = useToast();
 const { contextPath } = useLayout();
 const error = ref('');
 const submitted = ref('');
 const isLoading = ref(false);
+
 const login = reactive({
     email: ref(''),
     password: ref('')
 });
+
 const cerro = async () => {
     setTimeout(() => {
         error.value = '';
     }, 3000);
 };
+
 const iniciarSesion = async (isFormValid) => {
     if (!isFormValid) {
         submitted.value = true;
@@ -159,20 +152,49 @@ const iniciarSesion = async (isFormValid) => {
 };
 
 const obtenerDatosUsuario = async () => {
+    isLoading.value = true;
     if (sessionStorage.getItem('token')) {
-        await obtenerTodo('usuario/obtenerDatosUsuario').then((response) => {
-            sessionStorage.setItem('USER', JSON.stringify(response.user));
-            router.push('/reportes/semanales');
-            return response;
-        });
+        await obtenerTodo('usuario/obtenerDatosUsuario')
+            .then((response) => {
+                sessionStorage.setItem('USER', JSON.stringify(response.user));
+                const roles = JSON.parse(sessionStorage.getItem('USER')).permisos.roles;
+                if (roles.includes('Administrador')) {
+                    router.push('/reportes/semanales');
+                    return response;
+                }
+                if (roles.includes('GestionFinanciera')) {
+                    router.push('inicio/subirArchivos');
+                    console.log('GestionFinanciera');
+                    return response;
+                }
+                router.push('/reportes/semanales');
+                return response;
+            })
+            .catch((err) => {
+                toast.add({
+                    severity: 'error',
+                    summary: 'error',
+                    detail: err,
+                    life: 3000
+                });
+            })
+            .finally(() => {
+                isLoading.value = false;
+            });
     }
 };
 
-const rules = {
-    email: { required, email },
-    password: { required }
-};
-const v$ = useVuelidate(rules, login);
+const reglas = computed(() => {
+    return {
+        email: {
+            required: helpers.withMessage('El email es requerido', required),
+            email: helpers.withMessage('El valor no es una dirección de correo electrónico válida', email)
+        },
+        password: { required: helpers.withMessage('La contraseña es requerida', required) }
+    };
+});
+
+const v$ = useVuelidate(reglas, login);
 
 const logoUrl = computed(() => {
     return `${contextPath}layout/images/LOGOUNICO.webp`;

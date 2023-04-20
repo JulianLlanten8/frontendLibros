@@ -190,9 +190,9 @@
                 </article>
             </template>
         </Card>
-        <Card v-if="tipo === 'Saldos anuales'" class="col-12">
+        <Card v-if="tipo === 'Saldo Inicial'" class="col-12">
             <template #title>
-                <h5 class="text-2xl">Ingresar saldo anual</h5>
+                <h5 class="text-2xl">Ingresar saldo Inicial</h5>
             </template>
 
             <template #content>
@@ -209,7 +209,7 @@
                                 class="my-3 w-full"
                                 :showClear="true"
                                 :disabled="true"
-                                @change="validarSemanaChange('Saldos anuales')"
+                                @change="validarSemanaChange('Saldo Inicial')"
                             />
                         </div>
                     </div>
@@ -549,7 +549,7 @@ const validarSemana = ref(true);
 const cargandoSociedades = ref(null);
 
 const tipo = ref('');
-const tipos = ref(['Saldos bancarios', 'Rendimientos Financieros', 'Saldos anuales']);
+const tipos = ref(['Saldos bancarios', 'Rendimientos Financieros', 'Saldo Inicial']);
 
 const saldos = reactive({
     semana: null,
@@ -586,7 +586,7 @@ const obtenerSaldos = async (deTipo) => {
     const tipoSaldo = () => {
         if (deTipo == 'Saldos bancarios') return '/saldos/obtenerSemana/9/';
         if (deTipo == 'Rendimientos Financieros') return 'ejecutado/rendimiento/obtener/';
-        if (deTipo == 'Saldos anuales') return 'saldosAnuales';
+        if (deTipo == 'Saldo Inicial') return 'saldosAnuales';
     };
 
     //reset saldos
