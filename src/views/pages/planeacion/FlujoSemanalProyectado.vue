@@ -52,101 +52,57 @@
             </template>
         </Card>
     </main>
-    <Card v-if="!cargandoFlujo && flujo_caja && sociedadSeleccionada && semana && flujo_caja?.esperado" class="mt-3">
+    <Card v-if="!cargandoFlujo && flujo_caja && sociedadSeleccionada && semana" class="mt-3">
         <template #title>
-            <h3 class="text-center text-green-500">{{ flujo_caja.sociedad }}</h3>
-            <h3 class="text-2xl">{{ flujo_caja.descripcion }}</h3>
-        </template>
+            <h3 class="text-center text-green-500">{{ flujo_caja.inicio.sociedad }}</h3> </template
+        >sn
+
         <template #content>
-            <p>{{ flujo_caja.semana }}</p>
-            <h3>{{ $formatoMonedaCOP(flujo_caja?.esperado) }}</h3>
+            <div class="flex">
+                <cardEstadistica class="flex-grow-1 m-3" :estadistica="flujo_caja.inicio" />
+                <cardEstadistica class="flex-grow-1 m-3" :estadistica="flujo_caja.fin" />
+            </div>
         </template>
     </Card>
-    <div v-if="cargandoFlujo" class="border-round border-1 surface-border p-4 surface-card mt-2">
+    <div
+        v-if="cargandoFlujo"
+        class="border-round border-1 scalein animation-duration-300 surface-border p-4 surface-card mt-2"
+    >
         <div class="flex justify-content-center m-3">
             <Skeleton width="25rem" height="3rem"></Skeleton>
         </div>
-        <Skeleton width="100%" height="11rem"></Skeleton>
+        <Skeleton width="100%" height="8rem"></Skeleton>
     </div>
-    <!-- <table v-if="flujoSemanalProyectado">
-        <tr>
-            <th>Concepto</th>
-            <th>Descripcion</th>
-
-            <th v-for="cabecera in cabecerasfor" :key="cabecera.key">
-                {{ cabecera }}
-            </th>
-
-            
-        </tr>
-        
-        <td>
-            <tr v-for="concepto in generalTable.concepto" :key="concepto.key">
-                {{
-                    concepto
-                }}
-            </tr>
-        </td>
-
-        <td>
-            <tr v-for="descripcion in generalTable.descripcion" :key="descripcion.key">
-                {{
-                    descripcion
-                }}
-            </tr>
-        </td>
-
-        
-        <td v-for="pro in proyectado" :key="pro">
-            <tr>
-                {{
-                    pro
-                }}
-            </tr>
-        </td>
-        
-    </table> -->
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { obtenerTodo /* crear */ } from '@/service/clienteHttp';
 import { useToast } from 'primevue/usetoast';
 
+import cardEstadistica from '@/components/CardEstadisticaSemanal.vue';
+
 const toast = useToast();
 const sociedadSeleccionada = ref(null);
-
 const semana = ref(null);
-
 const sociedades = ref([]);
-
 const semanas = ref([]);
-
 const flujoSemanalProyectado = ref([]);
 const generalTable = ref([]);
 const cabecerasfor = ref([]);
-
 const cargandoSociedades = ref(false);
-
 const cargandoSemanas = ref(false);
-
 const cargandoFlujo = ref(false);
 const proyectado = ref([]);
-
-const flujo_caja = ref([]);
 const cargandoImprimir = ref(false);
+const flujo_caja = reactive({
+    inicio: {},
+    fin: {}
+});
 
 onMounted(() => {
     obtenerSociedades();
 });
-
-/* const claseTituloSubtitulo = (concepto) => {
-    if (concepto <= 2) {
-        return 'font-bold';
-    } else {
-        return 'ml-3';
-    }
-}; */
 
 const ObtenerFlujosProyectados = () => {
     cargandoFlujo.value = true;
@@ -156,8 +112,12 @@ const ObtenerFlujosProyectados = () => {
     obtenerTodo(`esperado/obtenerTodo/${sociedad}/${fechaFormateada}`)
         .then((res) => {
             flujoSemanalProyectado.value = res;
-            flujo_caja.value = res.at(-1);
-            flujo_caja.value = flujo_caja.value.at(-2);
+            flujo_caja.inicio = res.at(0);
+            flujo_caja.inicio = flujo_caja.inicio.at(0);
+            flujo_caja.fin = res.at(-1);
+            flujo_caja.fin = flujo_caja.fin.at(-2);
+            console.log(flujo_caja.fin);
+
             let general = {};
             let concepto = [];
             let descripcion = [];

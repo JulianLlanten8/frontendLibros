@@ -24,10 +24,10 @@
                     v-model:selection="usuariosSeleccionados"
                     dataKey="id"
                     :paginator="true"
-                    :rows="5"
+                    :rows="10"
                     :filters="filters"
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[3, 5, 25]"
+                    :rowsPerPageOptions="[10, 20, 50]"
                     currentPageReportTemplate="Mostrando de {first} a {last} de {totalRecords} usuarios"
                     responsiveLayout="scroll"
                     :loading="cargaTablaUsuarios"
@@ -87,6 +87,8 @@
                     :modal="true"
                     class="p-fluid"
                 >
+                    <!-- <BlockUI :blocked="cargando" :autoZIndex="true"> -->
+                    <ProgressBar v-if="cargando" mode="indeterminate" style="height: 6px"></ProgressBar>
                     <div class="field">
                         <label for="name" :class="{ 'p-error font-semibold': enviado && v$.name.$invalid }"
                             >Nombre Completo <span class="text-red-500">*</span></label
@@ -175,6 +177,7 @@
                         >
                         </MultiSelect>
                     </div>
+                    <!-- </BlockUI> -->
 
                     <template #footer>
                         <Button label="Cancelar" icon="pi pi-times" class="p-button-text" @click="hideDialog" />
@@ -182,6 +185,8 @@
                             label="Guardar"
                             icon="pi pi-check"
                             class="p-button-text"
+                            :disabled="enviado && v$.$invalid"
+                            :loading="cargando"
                             @click="guardarUsuario(!v$.$invalid)"
                         />
                     </template>
@@ -228,6 +233,7 @@ import { required, email, sameAs, helpers } from '@vuelidate/validators';
 
 const toast = useToast();
 const cambiar = ref(false);
+const cargando = ref(false);
 const cargaTablaUsuarios = ref(false);
 const userDialogo = ref(false);
 const usuarioparaDesactivar = ref(null);
@@ -290,10 +296,11 @@ const hideDialog = () => {
 const guardarUsuario = async (isFormValid) => {
     enviado.value = true;
     if (usuario.value && !usuario.value.id) {
-        // crea
         if (!isFormValid) {
             return;
         }
+        // crea
+        cargando.value = true;
         await crear(`/auth/signup`, usuario.value, 'application/json') // aqui se envia el usuario
             .then((response) => {
                 if (response.status === 201) {
@@ -307,12 +314,12 @@ const guardarUsuario = async (isFormValid) => {
                     ObtenerUsuarios();
                     userDialogo.value = false;
                 }
-                if (response.status === 422) {
+                if (response.response.status === 422) {
                     toast.add({
                         severity: 'error',
                         summary: 'Error al crear el usuario',
-                        detail: `${response.data.message}`,
-                        life: 3000
+                        detail: `${response.response.data.message}`,
+                        closable: true
                     });
                 }
             })
@@ -321,12 +328,14 @@ const guardarUsuario = async (isFormValid) => {
                     severity: 'error',
                     summary: 'Error al crear el usuario',
                     detail: `${error}`,
-                    life: 3000
+                    closable: true
                 });
+            })
+            .finally(() => {
+                cargando.value = false;
             });
     } else {
         //edita
-        console.log(usuario.value);
         await crear(`usuario/editar`, usuario.value, 'application/json')
             .then((response) => {
                 if (response.status === 200) {
