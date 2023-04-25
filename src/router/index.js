@@ -47,7 +47,7 @@ const router = createRouter({
                     name: 'saldos',
                     component: () => import('@/views/pages/planeacion/Saldos.vue'),
                     beforeEnter: [guardsRoute, checkRole],
-                    meta: { Administrador: true, GestionFinanciera: true }
+                    meta: { Administrador: true, GestionFinanciera: false }
                 }
             ]
         },

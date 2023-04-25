@@ -54,13 +54,13 @@
     </main>
     <Card v-if="!cargandoFlujo && flujo_caja && sociedadSeleccionada && semana" class="mt-3">
         <template #title>
-            <h3 class="text-center text-green-500">{{ flujo_caja.inicio.sociedad }}</h3> </template
-        >sn
+            <h3 class="text-center text-green-500">{{ flujo_caja.inicio.sociedad }}</h3>
+        </template>
 
         <template #content>
-            <div class="flex">
-                <cardEstadistica class="flex-grow-1 m-3" :estadistica="flujo_caja.inicio" />
-                <cardEstadistica class="flex-grow-1 m-3" :estadistica="flujo_caja.fin" />
+            <div class="flex flex-wrap">
+                <cardEstadistica class="flex-grow-1 m-3" :estadistica="flujo_caja.inicio" ciclo="inicial" />
+                <cardEstadistica class="flex-grow-1 m-3" :estadistica="flujo_caja.fin" ciclo="final" />
             </div>
         </template>
     </Card>
@@ -80,7 +80,7 @@ import { ref, onMounted, reactive } from 'vue';
 import { obtenerTodo /* crear */ } from '@/service/clienteHttp';
 import { useToast } from 'primevue/usetoast';
 
-import cardEstadistica from '@/components/CardEstadisticaSemanal.vue';
+import cardEstadistica from '@/components/CardEstadisticaProyectado.vue';
 
 const toast = useToast();
 const sociedadSeleccionada = ref(null);
@@ -116,7 +116,6 @@ const ObtenerFlujosProyectados = () => {
             flujo_caja.inicio = flujo_caja.inicio.at(0);
             flujo_caja.fin = res.at(-1);
             flujo_caja.fin = flujo_caja.fin.at(-2);
-            console.log(flujo_caja.fin);
 
             let general = {};
             let concepto = [];

@@ -28,21 +28,22 @@ const model = ref([
                         label: 'FC Semanal',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/semanales',
-                        rol: ['Administrador']
+                        roles: ['Administrador', 'GestionFinanciera']
                     },
                     {
                         label: 'FC Semanal Proyectado',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/esperado-semanal-proyectado',
-                        rol: ['Administrador']
+                        roles: ['Administrador']
                     },
                     {
                         label: 'FC Mensual',
                         icon: 'pi pi-fw pi-file-excel',
                         to: '/reportes/mensuales',
-                        rol: ['Administrador']
+                        roles: ['Administrador']
                     }
-                ]
+                ],
+                roles: ['Administrador', 'GestionFinanciera']
             }
         ]
     },
@@ -61,7 +62,8 @@ const model = ref([
                 to: '/inicio/subirArchivos',
                 roles: ['GestionFinanciera']
             }
-        ]
+        ],
+        roles: ['Administrador', 'GestionFinanciera']
     },
     {
         label: 'Administración del sistema',
@@ -72,7 +74,8 @@ const model = ref([
                 to: '/inicio/usuarios',
                 roles: ['Administrador']
             }
-        ]
+        ],
+        roles: ['Administrador']
     }
     /* ,
     {
@@ -84,11 +87,30 @@ const model = ref([
 const permisos = ref(JSON.parse(sessionStorage.getItem('USER'))?.permisos?.roles);
 const menubar = () => {
     if (permisos.value.includes('GestionFinanciera')) {
-        model.value = model.value.filter((items) => items.label === 'Integracion de datos');
-        return model.value.map((item) => {
-            item.items = item.items.filter((item) => item.roles.includes('GestionFinanciera'));
-            return item;
+        model.value = model.value.filter(
+            (items) => items.label === 'Integracion de datos' || items.label === 'Vista de datos'
+        );
+        const filteredData = model.value.filter((item) => {
+            if (item.items) {
+                item.items = item.items.filter((subItem) => {
+                    if (subItem.roles && subItem.roles.includes('GestionFinanciera')) {
+                        if (subItem.items) {
+                            subItem.items = subItem.items.filter((subSubItem) => {
+                                if (subSubItem.roles && subSubItem.roles.includes('GestionFinanciera')) {
+                                    return true;
+                                }
+                                return false;
+                            });
+                        }
+                        return true;
+                    }
+                    return false;
+                });
+                return true;
+            }
+            return false;
         });
+        return filteredData;
     }
     if (permisos.value.includes('Administrador')) {
         return model.value;

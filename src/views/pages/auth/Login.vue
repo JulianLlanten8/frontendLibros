@@ -164,7 +164,6 @@ const obtenerDatosUsuario = async () => {
                 }
                 if (roles.includes('GestionFinanciera')) {
                     router.push('inicio/subirArchivos');
-                    console.log('GestionFinanciera');
                     return response;
                 }
                 router.push('/reportes/semanales');

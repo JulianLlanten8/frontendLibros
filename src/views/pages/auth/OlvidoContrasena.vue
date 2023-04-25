@@ -27,7 +27,7 @@
                             <InputText
                                 type="text"
                                 class="w-full"
-                                placeholder="pepitoperez@unico.com.co"
+                                placeholder="ejemplo@unico.com.co"
                                 v-model="v$.correo.$model"
                                 autofocus
                                 :class="{ 'p-invalid': v$.correo.$invalid && submitted }"

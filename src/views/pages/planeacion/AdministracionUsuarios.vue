@@ -112,7 +112,7 @@
                             v-model.trim="usuario.email"
                             required="true"
                             :class="{ 'p-invalid': enviado && v$.email.$invalid }"
-                            placeholder="pepitoPerez@unico.com.co"
+                            placeholder="ejemplo@unico.com.co"
                         />
                         <!-- small con el error -->
                         <small v-if="enviado && v$.email.$invalid" class="p-error text-xs">
@@ -364,7 +364,6 @@ const guardarUsuario = async (isFormValid) => {
 };
 
 const asignarRol = async (id, rol) => {
-    console.log(id);
     await crear(`usuario/asignarRolUsuario`, { id: id, roles: rol }, 'application/json')
         .then((response) => {
             if (response.status === 200) {
@@ -394,7 +393,6 @@ const editarUsuario = (editProduct) => {
 
 const cambiarEstadoUsuario = () => {
     const usuario = usuarioparaDesactivar.value;
-    console.log(usuario);
     if (usuario) {
         crear(`usuario/cambiarEstadoUsuario`, usuario, 'application/json')
             .then((response) => {
