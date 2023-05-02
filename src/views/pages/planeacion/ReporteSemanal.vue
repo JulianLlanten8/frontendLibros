@@ -207,8 +207,8 @@ const obtenerSemanas = async (sociedad) => {
 };
 
 const filtroSociedades = (sociedad) => {
-    if (semanas.value.length > 0) {
-        ObtenerFlujos(sociedadSeleccionada.value, semana.value.name);
+    if (semana.value && sociedadSeleccionada.value) {
+        ObtenerFlujos(sociedadSeleccionada.value, semana.value);
     } else {
         obtenerSemanas(sociedad);
     }
@@ -271,7 +271,6 @@ const imprimir = async (flujoSemanal) => {
     }
 };
 </script>
-
 <style lang="scss" scoped>
 //
 </style>

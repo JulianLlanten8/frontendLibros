@@ -36,6 +36,13 @@ const router = createRouter({
                     meta: { Administrador: true }
                 },
                 {
+                    path: '/inicio/sociedades',
+                    name: 'sociedades',
+                    component: () => import('@/views/pages/planeacion/Sociedades.vue'),
+                    beforeEnter: [guardsRoute, checkRole],
+                    meta: { Administrador: true }
+                },
+                {
                     path: '/inicio/subirArchivos',
                     name: 'subirArchivos',
                     component: () => import('@/views/pages/planeacion/SubirArchivos.vue'),

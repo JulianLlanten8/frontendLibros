@@ -83,6 +83,16 @@ const actualizar = async (RUTA, DATA) => {
     }
 };
 
+/**
+ * Esta es una función asíncrona llamada "enviarDatos" que toma dos parámetros, "RUTA" y "DATA".
+ * @param RUTA - RUTA es un parámetro de cadena que representa la URL o punto final donde se enviarán
+ * los datos. Por lo general, se usa en solicitudes HTTP para especificar la ubicación del recurso al
+ * que se accede o se modifica.
+ * @param DATA - El parámetro `DATA` es un objeto que contiene la información que debe enviarse al
+ * servidor. Podría ser cualquier tipo de datos, como una cadena, un número, una matriz u otro objeto.
+ * El formato y la estructura de los datos dependerán de los requisitos específicos del extremo del
+ * servidor que está utilizando.
+ */
 const enviarDatos = async (RUTA, DATA) => {
     try {
         const respuesta = await axios.post(`${RUTA}`, DATA, {

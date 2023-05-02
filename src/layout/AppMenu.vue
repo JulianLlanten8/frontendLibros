@@ -69,9 +69,15 @@ const model = ref([
         label: 'Administración del sistema',
         items: [
             {
-                label: 'Administracion de usuarios',
+                label: 'Usuarios',
                 icon: 'pi pi-fw pi-users',
                 to: '/inicio/usuarios',
+                roles: ['Administrador']
+            },
+            {
+                label: 'Sociedades',
+                icon: 'pi pi-fw pi-building',
+                to: '/inicio/sociedades',
                 roles: ['Administrador']
             }
         ],

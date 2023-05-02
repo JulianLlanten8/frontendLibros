@@ -5,5 +5,12 @@ const formatoMonedaCOP = (valor) => {
         minimumFractionDigits: 0
     }).format(valor);
 };
-
-export { formatoMonedaCOP };
+const formatoFecha = (fecha) => {
+    const date = new Date(fecha);
+    return new Intl.DateTimeFormat('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    }).format(date);
+};
+export { formatoMonedaCOP, formatoFecha };

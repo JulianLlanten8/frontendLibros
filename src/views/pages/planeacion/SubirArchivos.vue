@@ -143,6 +143,7 @@ const obtenerSociedades = async () => {
     await obtenerTodo('sociedad/obtenerTodo')
         .then((res) => {
             sociedades.value = res.data;
+            sociedades.value = sociedades.value.filter((sociedad) => sociedad.nombre != 'P.A.O');
         })
         .catch((err) => {
             toast.add({
@@ -209,5 +210,6 @@ const subirArchivo = async (event) => {
         });
         cargando.value = false;
     }
+    cargando.value = false;
 };
 </script>
