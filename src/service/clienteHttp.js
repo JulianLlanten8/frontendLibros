@@ -70,16 +70,17 @@ const crear = async (RUTA, DATA, CONTENT = null) => {
  */
 const actualizar = async (RUTA, DATA) => {
     try {
-        DATA.id_user_log = sessionStorage.getItem('id').id;
+        let id = sessionStorage.getItem('USER') ? JSON.parse(sessionStorage.getItem('USER')).id : null;
+        let token = sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null;
+        DATA.id_user_log = id;
         const respuesta = await axios.put(`${RUTA}`, DATA, {
             headers: {
-                Authorization: `Bearer 
-                ${sessionStorage.getItem(JSON.parse('USER')) ? sessionStorage.getItem(JSON.parse('USER')) : null}`
+                Authorization: `Bearer ${token}`
             }
         });
-        return respuesta.statusText;
+        return respuesta;
     } catch (error) {
-        return error.statusText;
+        return error;
     }
 };
 

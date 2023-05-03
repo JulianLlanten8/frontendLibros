@@ -1,5 +1,6 @@
 <template>
     <main>
+        <Toast />
         <DataTable
             :value="sociedades"
             :paginator="true"
@@ -70,35 +71,45 @@
             <form @submit="guardarSociedad(!v$.$invalid)" class="flex flex-column gap-2">
                 <div class="p-field mb-3">
                     <label for="codigo">Codigo <span class="p-error">*</span></label>
-                    <InputNumber id="codigo" v-model="sociedad.codigo" placeholder="Codigo" />
+                    <InputNumber id="codigo" nombre="codigo" v-model="sociedad.codigo" placeholder="Codigo" />
                     <small v-if="enviar && v$?.nombre?.required.$invalid" class="p-error text-xs">
                         {{ v$?.codigo?.required.$message }}
                     </small>
                 </div>
                 <div class="p-field mb-3">
                     <label for="nombre">Nombre <span class="p-error">*</span></label>
-                    <InputText id="nombre" v-model="sociedad.nombre" placeholder="Nombre" />
+                    <InputText id="nombre" nombre="nombre" v-model="sociedad.nombre" placeholder="Nombre" />
                     <small v-if="enviar && v$?.nombre?.required.$invalid" class="p-error text-xs">
                         {{ v$?.nombre?.required.$message }}
                     </small>
                 </div>
                 <div class="p-field mb-3">
                     <label for="descripcion">Descripcion <span class="p-error">*</span></label>
-                    <InputText id="descripcion" v-model="sociedad.descripcion" placeholder="Descripcion" />
+                    <InputText
+                        id="descripcion"
+                        nombre="descripcion"
+                        v-model="sociedad.descripcion"
+                        placeholder="Descripcion"
+                    />
                     <small v-if="enviar && v$?.descripcion?.required.$invalid" class="p-error text-xs">
                         {{ v$?.descripcion?.required.$message }}
                     </small>
                 </div>
                 <div class="p-field mb-3">
                     <label for="razon_social">Razon social <span class="p-error">*</span></label>
-                    <InputText id="razon_social" v-model="sociedad.razon_social" placeholder="Razon social" />
+                    <InputText
+                        id="razon_social"
+                        nombre="razon_social"
+                        v-model="sociedad.razon_social"
+                        placeholder="Razon social"
+                    />
                     <small v-if="enviar && v$.razon_social?.required.$invalid" class="p-error text-xs">
                         {{ v$?.razon_social?.required.$message }}
                     </small>
                 </div>
                 <div class="p-field mb-3">
                     <label for="nit">NIT <span class="p-error">*</span></label>
-                    <InputText id="nit" v-model="sociedad.nit" placeholder="NIT" />
+                    <InputText id="nit" nombre="nit" v-model="sociedad.nit" placeholder="NIT" />
                     <small v-if="enviar && v$.nit.required.$invalid" class="p-error text-xs">
                         {{ v$?.nit?.required.$message }}
                     </small>
@@ -107,6 +118,8 @@
                 <div class="p-field mb-3">
                     <label for="estado">Estado</label>
                     <ToggleButton
+                        id="estado"
+                        nombre="estado"
                         v-model="sociedad.deleted_at"
                         onLabel="Desactivado"
                         offLabel="Habilitado"
@@ -197,7 +210,6 @@ const crearSociedad = () => {
 
 const editarSociedad = (s) => {
     sociedad.value = { ...s };
-    console.log(sociedad.value);
     sociedadDialogo.value = true;
 };
 const cerrarDialogo = () => {
@@ -213,7 +225,8 @@ const guardarSociedad = async (isFormValid) => {
 
         await crear('/sociedad/crear', sociedad.value, 'application/json')
             .then((response) => {
-                toast.add({ severity: 'success', summary: 'Exito', detail: `${response}` });
+                console.log('funciona');
+                toast.add({ severity: 'success', summary: 'Exito', detail: `${response}`, life: 3000 });
                 sociedadDialogo.value = false;
                 obtenerSociedades();
             })
@@ -225,18 +238,15 @@ const guardarSociedad = async (isFormValid) => {
                 guardandoSociedad.value = false;
             });
     } else {
-        console.log('editando...');
         guardandoSociedad.value = true;
         await actualizar('/sociedad/actualizar', sociedad.value)
             .then((response) => {
-                console.log(response);
                 toast.add({ severity: 'success', summary: 'Exito', detail: `${response}` });
                 sociedadDialogo.value = false;
                 obtenerSociedades();
             })
             .catch((error) => {
-                console.log(error);
-                toast.add({ severity: 'error', summary: 'Error', detail: 'Error al editar la sociedad' });
+                toast.add({ severity: 'error', summary: 'Error', detail: `${error}` });
             })
             .finally(() => {
                 guardandoSociedad.value = false;

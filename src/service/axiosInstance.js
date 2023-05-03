@@ -19,7 +19,15 @@ axios.interceptors.response.use(
         return response;
     },
     (error) => {
-        if (error.response.status === 401) {
+        if (error?.response?.status === 401) {
+            sessionStorage.removeItem('token');
+            // window.location.href = '/';
+        }
+        if (error?.response?.status === 403) {
+            sessionStorage.removeItem('token');
+            // window.location.href = '/';
+        }
+        if (error?.response?.status === 404) {
             sessionStorage.removeItem('token');
             // window.location.href = '/';
         }
