@@ -45,15 +45,8 @@ const obtenerTodo = async (RUTA, Type = null) => {
  */
 const crear = async (RUTA, DATA, CONTENT = null) => {
     try {
-        let user = sessionStorage.getItem('USER');
-
-        DATA.id_user_log = JSON.parse(user).id;
-
-        let token = sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null;
-
         const respuesta = await axios.post(`${RUTA}`, DATA, {
             headers: {
-                Authorization: `Bearer ${token}`,
                 'Content-Type': CONTENT
             }
         });
@@ -70,13 +63,19 @@ const crear = async (RUTA, DATA, CONTENT = null) => {
  */
 const actualizar = async (RUTA, DATA) => {
     try {
-        let id = sessionStorage.getItem('USER') ? JSON.parse(sessionStorage.getItem('USER')).id : null;
-        let token = sessionStorage.getItem('token') ? sessionStorage.getItem('token') : null;
-        DATA.id_user_log = id;
         const respuesta = await axios.put(`${RUTA}`, DATA, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+            headers: {}
+        });
+        return respuesta;
+    } catch (error) {
+        return error;
+    }
+};
+
+const eliminar = async (RUTA, ID) => {
+    try {
+        const respuesta = await axios.delete(`${RUTA}/${ID}`, {
+            headers: {}
         });
         return respuesta;
     } catch (error) {
@@ -108,4 +107,4 @@ const enviarDatos = async (RUTA, DATA) => {
     }
 };
 
-export { enviarDatos, obtenerPorId, obtenerTodo, crear, actualizar };
+export { enviarDatos, obtenerPorId, obtenerTodo, crear, actualizar, eliminar };

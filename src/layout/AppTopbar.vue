@@ -1,8 +1,8 @@
 <template>
     <div class="layout-topbar">
-        <router-link to="/reportes/semanales" class="layout-topbar-logo">
+        <router-link to="/" class="layout-topbar-logo">
             <img :src="logoUrl" alt="logo" />
-            <span>Reportes Auto. Planeación</span>
+            <span>Libros</span>
         </router-link>
 
         <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
@@ -27,7 +27,6 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import { useRouter } from 'vue-router';
-import { clearSession } from '@/router/auth-guard';
 const { layoutConfig, onMenuToggle, contextPath } = useLayout();
 const user = ref(null);
 const outsideClickListener = ref(null);
@@ -52,7 +51,6 @@ const onTopBarMenuButton = () => {
 };
 const onSettingsClick = () => {
     /* topbarMenuActive.value = false; */
-    clearSession();
     router.push('/');
 };
 const topbarMenuClasses = computed(() => {

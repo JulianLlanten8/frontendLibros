@@ -110,7 +110,6 @@ import { formatoMonedaCOP, formatoFecha } from '@/utils/globals';
 
 const app = createApp(App);
 app.config.performance = true;
-
 app.config.globalProperties.$formatoMonedaCOP = formatoMonedaCOP;
 app.config.globalProperties.$formatoFecha = formatoFecha;
 app.use(router);
