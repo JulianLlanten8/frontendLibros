@@ -7,7 +7,7 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig(({ command }) => {
     return {
         plugins: [vue()],
-        base: command === 'serve' ? '' : '/sakai-vue/',
+        base: command === 'serve' ? '' : '/',
         resolve: {
             alias: {
                 '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -17,6 +17,9 @@ export default defineConfig(({ command }) => {
             watch: {
                 usePolling: true
             }
+        },
+        build: {
+            outDir: '../dist'
         }
     };
 });
