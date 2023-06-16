@@ -7,7 +7,7 @@ import vue from '@vitejs/plugin-vue';
 export default defineConfig(({ command }) => {
     return {
         plugins: [vue()],
-        base: command === 'serve' ? '' : '/dist/',
+        base: command === 'serve' ? '' : 'deploy',
         resolve: {
             alias: {
                 '@': fileURLToPath(new URL('./src', import.meta.url))
