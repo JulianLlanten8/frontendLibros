@@ -17,9 +17,6 @@ export default defineConfig(({ command }) => {
             watch: {
                 usePolling: true
             }
-        },
-        build: {
-            outDir: '../dist'
         }
     };
 });
