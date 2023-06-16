@@ -1,6 +1,9 @@
-# sakai-vue
-
+# Prueba de desarrollo
 This template should help get you started developing with Vue 3 in Vite.
+
+## Vista previa
+
+![Alt text](public/Libros-online.png)
 
 ## Recommended IDE Setup
 
@@ -9,10 +12,6 @@ This template should help get you started developing with Vue 3 in Vite.
 ## Customize configuration
 
 See [Vite Configuration Reference](https://vitejs.dev/config/).
-
-## preview
-
-![Alt text](public/Libros-online.png)
 
 ## Project Setup
 
