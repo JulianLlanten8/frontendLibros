@@ -1,4 +1,4 @@
-# Prueba de desarrollo
+# Frontend Libros
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Vista previa
