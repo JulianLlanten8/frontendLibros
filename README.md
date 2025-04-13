@@ -1,5 +1,5 @@
 # Frontend Libros
-This template should help get you started developing with Vue 3 in Vite.
+Frontend Libros es una aplicación web diseñada para gestionar libros. Proporciona una interfaz intuitiva y moderna para que los usuarios puedan buscar, visualizar y administrar colecciones de libros fácilmente. with Vue 3 in Vite.
 
 ## Vista previa
 
